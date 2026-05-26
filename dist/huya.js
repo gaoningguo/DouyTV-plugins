@@ -21,6 +21,7 @@ var __plugin__ = (() => {
   // plugins/huya.js
   var huya_exports = {};
   __export(huya_exports, {
+    getCategories: () => getCategories,
     getRecommend: () => getRecommend,
     manifest: () => manifest,
     resolve: () => resolve
@@ -92,6 +93,37 @@ var __plugin__ = (() => {
       link: `https://www.huya.com/${r.profileRoom || r.privateHost}`
     })).filter((r) => r.roomId);
     return { list, hasMore: rooms.length >= pageSize };
+  }
+  var PARENT_CATS = [
+    { id: "1", name: "\u7F51\u6E38" },
+    { id: "2", name: "\u5355\u673A" },
+    { id: "8", name: "\u5A31\u4E50" },
+    { id: "3", name: "\u624B\u6E38" }
+  ];
+  async function getCategories(ctx) {
+    const out = [];
+    for (const parent of PARENT_CATS) {
+      try {
+        const data = await fetchJson(
+          ctx,
+          `https://live.cdn.huya.com/liveconfig/game/bussLive?bussType=${parent.id}`
+        );
+        const items = data.data ?? [];
+        for (const item of items) {
+          const gid = item.gid !== void 0 ? String(item.gid) : null;
+          if (!gid) continue;
+          out.push({
+            id: gid,
+            name: item.gameFullName ?? "",
+            cover: `https://huyaimg.msstatic.com/cdnimage/game/${gid}-MS.jpg`,
+            parent: parent.name
+          });
+        }
+      } catch (e) {
+        console.warn(`[huya] category ${parent.name} failed`, e);
+      }
+    }
+    return out;
   }
   return __toCommonJS(huya_exports);
 })();

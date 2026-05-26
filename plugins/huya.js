@@ -82,3 +82,40 @@ export async function getRecommend(ctx, { page, pageSize }) {
   })).filter((r) => r.roomId);
   return { list, hasMore: rooms.length >= pageSize };
 }
+
+const PARENT_CATS = [
+  { id: "1", name: "网游" },
+  { id: "2", name: "单机" },
+  { id: "8", name: "娱乐" },
+  { id: "3", name: "手游" },
+];
+
+export async function getCategories(ctx) {
+  const out = [];
+  
+  for (const parent of PARENT_CATS) {
+    try {
+      const data = await fetchJson(
+        ctx, 
+        `https://live.cdn.huya.com/liveconfig/game/bussLive?bussType=${parent.id}`
+      );
+      
+      const items = data.data ?? [];
+      for (const item of items) {
+        const gid = item.gid !== undefined ? String(item.gid) : null;
+        if (!gid) continue;
+        
+        out.push({
+          id: gid,
+          name: item.gameFullName ?? "",
+          cover: `https://huyaimg.msstatic.com/cdnimage/game/${gid}-MS.jpg`,
+          parent: parent.name,
+        });
+      }
+    } catch (e) {
+      console.warn(`[huya] category ${parent.name} failed`, e);
+    }
+  }
+  
+  return out;
+}

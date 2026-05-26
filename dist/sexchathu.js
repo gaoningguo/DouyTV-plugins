@@ -27,132 +27,213 @@ var __plugin__ = (() => {
     resolve: () => resolve,
     search: () => search
   });
-  var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
-  var REFERER = "https://sexchat.hu/";
-  var API_BASE = "https://sexchat.hu/ajax/api/roomList/babes";
-  var HEADERS = { "User-Agent": UA, Referer: REFERER, Accept: "application/json, text/plain, */*" };
   var manifest = {
     id: "sexchathu",
-    label: "SexChat HU",
+    label: "SexChat.hu",
     version: "1.0.0",
     adult: true,
-    defaultProxy: "proxy",
     engine: { netliveApi: 1 }
   };
-  var roomCache = [];
-  function statusLabel(s) {
-    if (!s) return "offline";
-    const lower = s.toLowerCase();
-    if (lower === "free") return "free";
-    if (lower === "offline") return "offline";
+  var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
+  var REFERER = "https://sexchat.hu/";
+  var COMMON_HEADERS = {
+    "User-Agent": UA,
+    Referer: REFERER,
+    Accept: "application/json, text/plain, */*"
+  };
+  var LIST_ENDPOINTS = [
+    "https://sexchat.hu/ajax/api/roomList/babes",
+    "https://sexchat.hu/ajax/api/roomList/babes/all"
+  ];
+  function ensureHttps(url) {
+    if (!url) return void 0;
+    if (url.startsWith("//")) return "https:" + url;
+    return url;
+  }
+  async function fetchEndpoint(ctx, url) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await ctx.fetch(url, {
+          method: "GET",
+          headers: COMMON_HEADERS,
+          timeout: 3e4,
+          http2: true
+        });
+        if (res.ok) return await res.json();
+        if (res.status < 500) return [];
+      } catch {
+      }
+      if (attempt === 0) await new Promise((r) => setTimeout(r, 400));
+    }
+    return [];
+  }
+  async function fetchAll(ctx) {
+    const lists = await Promise.all(LIST_ENDPOINTS.map((u) => fetchEndpoint(ctx, u)));
+    if (lists.every((l) => l.length === 0)) {
+      const res = await ctx.fetch(LIST_ENDPOINTS[0], {
+        method: "GET",
+        headers: COMMON_HEADERS,
+        timeout: 3e4,
+        http2: true
+      });
+      if (!res.ok) throw new Error("SexChatHU HTTP " + res.status);
+      return await res.json();
+    }
+    const seen = /* @__PURE__ */ new Set();
+    const merged = [];
+    for (const list of lists) {
+      for (const room of list) {
+        const key = String(room.perfid ?? room.screenname ?? "");
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        merged.push(room);
+      }
+    }
+    return merged;
+  }
+  function statusKind(status) {
+    const s = (status ?? "").toLowerCase();
+    if (s === "free") return "free";
+    if (s === "offline") return "offline";
     return "private";
   }
   function mapRoom(r) {
-    if (!r.perfid || !r.screenname) return void 0;
-    const st = statusLabel(r.onlinestatus);
-    if (st === "offline") return void 0;
-    const cover = r.snapshotid_big ? `https://m1.nsimg.net/bigsnapshots/${r.snapshotid_big}` : r.snapshotid ? `https://m1.nsimg.net/snapshots/${r.snapshotid}` : void 0;
+    const screen = r.screenname || r.onlineparams?.screenName;
+    if (!screen) return void 0;
+    const kind = statusKind(r.onlinestatus);
+    const primaryCat = r.onlineparams?.publicData?.primaryCat || r.primarycat;
+    const category = kind === "private" ? "\u{1F512} \u79C1\u5BC6\u76F4\u64AD\u4E2D" : primaryCat;
     return {
       platform: "sexchathu",
-      roomId: r.screenname,
-      title: r.screenname,
-      uname: r.screenname,
-      cover,
+      roomId: screen,
+      title: screen,
+      uname: screen,
+      cover: ensureHttps(r.snapshotid_big || r.snapshotid),
       online: 0,
-      category: st === "free" ? "Free Chat" : "Private",
-      live: st === "free",
-      link: `https://sexchat.hu/${r.screenname}`,
-      _perfid: r.perfid
+      category,
+      live: kind === "free",
+      link: r.perfid ? "https://sexchat.hu/mypage/" + r.perfid + "/" + encodeURIComponent(screen) + "/chat" : "https://sexchat.hu/"
     };
   }
-  async function getRecommend(ctx, { page, pageSize }) {
-    const [res1, res2] = await Promise.all([
-      ctx.fetch(API_BASE, { headers: HEADERS, timeout: 25e3 }),
-      ctx.fetch(`${API_BASE}/all`, { headers: HEADERS, timeout: 25e3 })
-    ]);
-    const arr1 = res1.ok ? await res1.json() : [];
-    const arr2 = res2.ok ? await res2.json() : [];
-    const seen = /* @__PURE__ */ new Set();
-    const merged = [];
-    for (const r of [...Array.isArray(arr1) ? arr1 : [], ...Array.isArray(arr2) ? arr2 : []]) {
-      if (!r.perfid || seen.has(r.perfid)) continue;
-      seen.add(r.perfid);
-      merged.push(r);
+  function statusOrder(status) {
+    switch (statusKind(status)) {
+      case "free":
+        return 0;
+      case "private":
+        return 1;
+      default:
+        return 2;
     }
-    merged.sort((a, b) => {
-      const aFree = (a.onlinestatus || "").toLowerCase() === "free" ? 0 : 1;
-      const bFree = (b.onlinestatus || "").toLowerCase() === "free" ? 0 : 1;
-      return aFree - bFree;
-    });
-    roomCache = merged;
-    const offset = (page - 1) * pageSize;
-    const slice = merged.slice(offset, offset + pageSize);
-    const list = slice.map(mapRoom).filter(Boolean);
-    return { list, hasMore: offset + pageSize < merged.length };
   }
-  async function search(ctx, { keyword }) {
-    const kw = keyword.toLowerCase();
-    let rooms = roomCache;
-    if (!rooms.length) {
-      const [res1, res2] = await Promise.all([
-        ctx.fetch(API_BASE, { headers: HEADERS, timeout: 25e3 }),
-        ctx.fetch(`${API_BASE}/all`, { headers: HEADERS, timeout: 25e3 })
-      ]);
-      const arr1 = res1.ok ? await res1.json() : [];
-      const arr2 = res2.ok ? await res2.json() : [];
-      const seen = /* @__PURE__ */ new Set();
-      rooms = [];
-      for (const r of [...Array.isArray(arr1) ? arr1 : [], ...Array.isArray(arr2) ? arr2 : []]) {
-        if (!r.perfid || seen.has(r.perfid)) continue;
-        seen.add(r.perfid);
-        rooms.push(r);
-      }
-      roomCache = rooms;
+  var pagedCache = null;
+  var PAGED_CACHE_TTL_MS = 5 * 60 * 1e3;
+  var PAGED_SOFT_LIMIT = 15;
+  function roomKey(r) {
+    return String(r.perfid ?? r.screenname ?? "");
+  }
+  function findCachedRoom(roomId) {
+    if (!pagedCache) return void 0;
+    if (/^\d+$/.test(roomId)) {
+      const direct = pagedCache.rooms.get(roomId);
+      if (direct) return direct;
     }
-    const filtered = rooms.filter((r) => (r.screenname || "").toLowerCase().includes(kw));
-    const list = filtered.map(mapRoom).filter(Boolean);
+    const lower = roomId.toLowerCase();
+    for (const r of pagedCache.rooms.values()) {
+      if ((r.screenname ?? "").toLowerCase() === lower) return r;
+    }
+    return void 0;
+  }
+  async function fetchRoomByPerfid(ctx, perfid) {
+    const arr = await fetchEndpoint(
+      ctx,
+      "https://sexchat.hu/ajax/api/roomList/babes/" + perfid
+    );
+    const target = String(perfid);
+    return arr.find((r) => String(r.perfid) === target);
+  }
+  async function getRecommend(ctx, { page, pageSize }) {
+    const now = Date.now();
+    const stale = !pagedCache || now - pagedCache.lastUpdate > PAGED_CACHE_TTL_MS;
+    if (page === 1 || stale) {
+      pagedCache = { rooms: /* @__PURE__ */ new Map(), exhausted: false, lastUpdate: now };
+    }
+    if (pagedCache.exhausted) {
+      return { list: [], hasMore: false };
+    }
+    const fresh = await fetchAll(ctx);
+    const newRooms = [];
+    for (const r of fresh) {
+      const key = roomKey(r);
+      if (!key) continue;
+      if (!pagedCache.rooms.has(key)) {
+        pagedCache.rooms.set(key, r);
+        newRooms.push(r);
+      }
+    }
+    pagedCache.lastUpdate = now;
+    if (newRooms.length === 0) {
+      pagedCache.exhausted = true;
+      return { list: [], hasMore: false };
+    }
+    const sorted = newRooms.sort(
+      (a, b) => statusOrder(a.onlinestatus) - statusOrder(b.onlinestatus)
+    );
+    const list = sorted.map(mapRoom).filter((r) => !!r);
+    const hasMore = page < PAGED_SOFT_LIMIT;
+    return { list, hasMore };
+  }
+  async function search(ctx, { keyword, page }) {
+    const arr = await fetchAll(ctx);
+    const kw = keyword.toLowerCase();
+    const list = arr.filter((r) => (r.screenname ?? "").toLowerCase().includes(kw)).sort((a, b) => statusOrder(a.onlinestatus) - statusOrder(b.onlinestatus)).map(mapRoom).filter((r) => !!r);
     return { list, hasMore: false };
   }
   async function resolve(ctx, { roomId }) {
-    let perfid;
-    const cached = roomCache.find((r) => (r.screenname || "").toLowerCase() === roomId.toLowerCase());
-    if (cached) {
-      perfid = cached.perfid;
-    } else {
-      const res2 = await ctx.fetch(API_BASE, { headers: HEADERS, timeout: 2e4 });
-      if (res2.ok) {
-        const arr = await res2.json();
-        const found = (Array.isArray(arr) ? arr : []).find(
-          (r) => (r.screenname || "").toLowerCase() === roomId.toLowerCase()
-        );
-        if (found) perfid = found.perfid;
+    let cached = findCachedRoom(roomId);
+    if (!cached) {
+      const arr = await fetchAll(ctx);
+      cached = arr.find(
+        (r) => (r.screenname ?? "").toLowerCase() === roomId.toLowerCase()
+      );
+      if (!cached) {
+        throw new Error("SexChatHU \u672A\u627E\u5230\u4E3B\u64AD " + roomId + "\uFF08\u53EF\u80FD\u5DF2\u79BB\u7EBF\uFF09");
       }
     }
-    if (!perfid) throw new Error(`SexChatHU: ${roomId} \u672A\u627E\u5230\u6216\u4E0D\u5728\u7EBF`);
-    const res = await ctx.fetch(`${API_BASE}/${perfid}`, { headers: HEADERS, timeout: 2e4 });
-    if (!res.ok) throw new Error(`SexChatHU HTTP ${res.status}`);
-    const data = await res.json();
-    const rooms = Array.isArray(data) ? data : [];
-    const room = rooms.find((r) => r.perfid === perfid);
-    if (!room) throw new Error(`SexChatHU: ${roomId} \u623F\u95F4\u6570\u636E\u4E3A\u7A7A`);
-    const hlsAddr = room.onlineparams?.modeSpecific?.main?.hls?.address;
-    if (!hlsAddr) throw new Error(`SexChatHU: ${roomId} \u65E0 HLS \u5730\u5740 (\u53EF\u80FD\u4E0D\u5728\u7EBF)`);
-    const hlsUrl = hlsAddr.startsWith("//") ? `https:${hlsAddr}` : hlsAddr;
-    return ctx.protocols.hlsStream({ url: hlsUrl, referer: REFERER, ua: UA });
+    if (!cached.perfid) {
+      throw new Error("SexChatHU " + roomId + " \u7F3A perfid\uFF0C\u65E0\u6CD5 resolve");
+    }
+    const fresh = await fetchRoomByPerfid(ctx, cached.perfid);
+    if (!fresh) {
+      throw new Error("SexChatHU \u4E3B\u64AD " + roomId + " \u5DF2\u4E0B\u7EBF");
+    }
+    const status = (fresh.onlinestatus ?? "").toLowerCase();
+    if (status !== "free") {
+      throw new Error(
+        "SexChatHU \u4E3B\u64AD " + roomId + " \u72B6\u6001 " + status + "\uFF08\u79C1\u5BC6/\u79BB\u7EBF\uFF0C\u533F\u540D\u65E0\u753B\u9762\uFF09"
+      );
+    }
+    const hls = ensureHttps(fresh.onlineparams?.modeSpecific?.main?.hls?.address);
+    if (!hls) throw new Error("SexChatHU " + roomId + " \u65E0 HLS URL\uFF08\u72B6\u6001 free \u4F46\u65E0\u6D41\uFF09");
+    return ctx.protocols.hlsStream({
+      url: hls,
+      qn: "auto",
+      qnLabel: "\u81EA\u9002\u5E94",
+      referer: REFERER,
+      ua: UA
+    });
   }
   async function getLiveStatus(ctx, { roomId }) {
     try {
-      const cached = roomCache.find((r) => (r.screenname || "").toLowerCase() === roomId.toLowerCase());
-      if (cached) {
-        return (cached.onlinestatus || "").toLowerCase() === "free";
+      const cached = findCachedRoom(roomId);
+      if (cached?.perfid) {
+        const fresh = await fetchRoomByPerfid(ctx, cached.perfid);
+        return (fresh?.onlinestatus ?? "").toLowerCase() === "free";
       }
-      const res = await ctx.fetch(API_BASE, { headers: HEADERS, timeout: 15e3 });
-      if (!res.ok) return false;
-      const arr = await res.json();
-      const room = (Array.isArray(arr) ? arr : []).find(
-        (r) => (r.screenname || "").toLowerCase() === roomId.toLowerCase()
+      const arr = await fetchAll(ctx);
+      const found = arr.find(
+        (r) => (r.screenname ?? "").toLowerCase() === roomId.toLowerCase()
       );
-      return room ? (room.onlinestatus || "").toLowerCase() === "free" : false;
+      return (found?.onlinestatus ?? "").toLowerCase() === "free";
     } catch {
       return false;
     }

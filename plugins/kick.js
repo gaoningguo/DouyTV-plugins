@@ -1,132 +1,248 @@
 /**
- * Kick.com 直播插件
+ * Kick 直播 plugin —— Twitch 替代平台，公开 REST API（无需 token）。
  *
- * 协议：HLS (master m3u8 + ABR variants)
- * API：https://kick.com/api/v2/channels/{slug}
+ * roomId = channel slug (lowercase username)。
  */
-const REFERER = "https://kick.com/";
-const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
-
-const HEADERS = {
-  "User-Agent": UA,
-  Referer: REFERER,
-  Origin: "https://kick.com",
-  Accept: "application/json, text/plain, */*",
-};
-
-function parseMaster(text, masterUrl) {
-  const lines = text.split("\n");
-  const variants = [];
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line.startsWith("#EXT-X-STREAM-INF:")) continue;
-    const urlLine = (lines[i + 1] || "").trim();
-    if (!urlLine || urlLine.startsWith("#")) continue;
-    const bw = parseInt((line.match(/BANDWIDTH=(\d+)/) || [])[1] || "0", 10);
-    const res = (line.match(/RESOLUTION=([^\s,]+)/) || [])[1] || "";
-    const absUrl = urlLine.startsWith("http") ? urlLine : new URL(urlLine, masterUrl).toString();
-    variants.push({ qn: res || String(bw), label: res || `${Math.round(bw / 1000)}k`, url: absUrl, bandwidth: bw });
-  }
-  variants.sort((a, b) => b.bandwidth - a.bandwidth);
-  return variants;
-}
 
 export const manifest = {
   id: "kick",
   label: "Kick",
   version: "1.0.0",
-  defaultProxy: "proxy",
   engine: { netliveApi: 1 },
 };
 
-export async function resolve(ctx, { roomId }) {
-  const res = await ctx.fetch(`https://kick.com/api/v2/channels/${encodeURIComponent(roomId)}`, {
-    headers: HEADERS,
-    timeout: 20000,
+const UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
+const REFERER = "https://kick.com/";
+
+const COMMON_HEADERS = {
+  "User-Agent": UA,
+  Referer: REFERER,
+  Origin: "https://kick.com",
+  Accept: "application/json, text/plain, */*",
+  "Accept-Language": "en-US,en;q=0.9",
+  "Sec-Fetch-Site": "same-origin",
+  "Sec-Fetch-Mode": "cors",
+  "Sec-Fetch-Dest": "empty",
+  "Sec-Ch-Ua":
+    '"Chromium";v="130", "Not(A:Brand";v="99", "Google Chrome";v="130"',
+  "Sec-Ch-Ua-Mobile": "?0",
+  "Sec-Ch-Ua-Platform": '"Windows"',
+};
+
+function pickThumb(t) {
+  if (!t) return undefined;
+  if (typeof t === "string") return t;
+  return t.src ?? t.url ?? undefined;
+}
+
+function mapStreamToRoom(s) {
+  const slug = s.channel?.slug ?? s.slug;
+  if (!slug) return undefined;
+  return {
+    platform: "kick",
+    roomId: slug,
+    title: s.session_title ?? slug,
+    uname: s.channel?.user?.username ?? slug,
+    avatar: s.channel?.user?.profile_pic,
+    cover: pickThumb(s.thumbnail),
+    online: s.viewer_count ?? 0,
+    category: s.categories?.[0]?.name,
+    live: !!s.is_live,
+    link: `https://kick.com/${slug}`,
+  };
+}
+
+async function getJson(ctx, url) {
+  const res = await ctx.fetch(url, {
+    method: "GET",
+    headers: COMMON_HEADERS,
+    timeout: 25000,
+    http2: true,
   });
   if (!res.ok) throw new Error(`Kick HTTP ${res.status}`);
-  const data = await res.json();
-  const playbackUrl = data.playback_url || data.livestream?.playback_url;
-  if (!playbackUrl) throw new Error(`Kick 主播 ${roomId} 未在直播`);
+  return res.json();
+}
 
-  // 拉 master m3u8 解析 variants
-  let alternatives;
-  try {
-    const m3u8Res = await ctx.fetch(playbackUrl, { headers: { "User-Agent": UA, Referer: REFERER } });
-    if (m3u8Res.ok) {
-      const text = await m3u8Res.text();
-      const vars = parseMaster(text, playbackUrl);
-      if (vars.length > 1) {
-        alternatives = [{ qn: "auto", label: "自适应", url: playbackUrl }, ...vars];
+/* ─────────────── 推荐 ─────────────── */
+
+export async function getRecommend(ctx, { page, pageSize }) {
+  const candidates = [
+    `https://kick.com/api/v2/featured-livestreams/en?page=${page}`,
+    `https://kick.com/featured-livestreams/en?page=${page}`,
+    `https://kick.com/stream/livestreams/en?page=${page}&limit=24`,
+  ];
+  for (const url of candidates) {
+    try {
+      const data = await getJson(ctx, url);
+      const arr = Array.isArray(data) ? data : data?.data ?? [];
+      if (arr.length > 0) {
+        const list = arr.map(mapStreamToRoom).filter((r) => !!r);
+        return { list, hasMore: arr.length >= 20 };
       }
+    } catch {
+      /* try next */
     }
-  } catch {}
+  }
+  return { list: [], hasMore: false };
+}
 
-  const top = alternatives?.[1];
+/* ─────────────── 分类 ─────────────── */
+
+export async function getCategories(ctx) {
+  try {
+    const data = await getJson(ctx, "https://kick.com/api/v1/categories");
+    const arr = Array.isArray(data) ? data : data?.data ?? [];
+    return arr.slice(0, 40).map((c) => ({
+      id: c.slug,
+      name: c.name,
+      cover: c.banner?.url ?? undefined,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export async function getCategoryRooms(ctx, { categoryId, page }) {
+  const candidates = [
+    `https://kick.com/api/v2/categories/${encodeURIComponent(categoryId)}/livestreams?page=${page}`,
+    `https://kick.com/api/v2/categories/${encodeURIComponent(categoryId)}/streams?page=${page}`,
+    `https://kick.com/api/v1/categories/${encodeURIComponent(categoryId)}/livestreams?page=${page}`,
+    `https://kick.com/stream/livestreams/en?category=${encodeURIComponent(categoryId)}&page=${page}&limit=24`,
+  ];
+  for (const url of candidates) {
+    try {
+      const data = await getJson(ctx, url);
+      const arr = Array.isArray(data) ? data : data?.data ?? [];
+      if (arr.length > 0) {
+        const list = arr.map(mapStreamToRoom).filter((r) => !!r);
+        return { list, hasMore: arr.length >= 20 };
+      }
+    } catch {
+      /* try next */
+    }
+  }
+  return { list: [], hasMore: false };
+}
+
+/* ─────────────── 搜索 ─────────────── */
+
+export async function search(ctx, { keyword, page }) {
+  const url = `https://kick.com/api/v2/channels/search?searched_word=${encodeURIComponent(keyword)}`;
+  const data = await getJson(ctx, url);
+  const arr = Array.isArray(data) ? data : data?.data ?? [];
+  const list = arr.map((c) => ({
+    platform: "kick",
+    roomId: c.slug,
+    title: c.livestream?.session_title ?? c.user?.username ?? c.slug,
+    uname: c.user?.username ?? c.slug,
+    avatar: c.user?.profile_pic,
+    cover: pickThumb(c.livestream?.thumbnail),
+    online: c.livestream?.viewer_count ?? 0,
+    live: !!c.is_live || !!c.livestream,
+    link: `https://kick.com/${c.slug}`,
+  }));
+  return { list, hasMore: false };
+}
+
+/* ─────────────── 房间详情 + resolve ─────────────── */
+
+async function fetchChannel(ctx, slug) {
+  return getJson(ctx,
+    `https://kick.com/api/v2/channels/${encodeURIComponent(slug)}`
+  );
+}
+
+export async function getRoomDetail(ctx, { roomId }) {
+  const ch = await fetchChannel(ctx, roomId);
+  const ls = ch.livestream;
+  return {
+    platform: "kick",
+    roomId: ch.slug ?? roomId,
+    title: ls?.session_title ?? ch.user?.username ?? ch.slug ?? roomId,
+    uname: ch.user?.username ?? ch.slug,
+    avatar: ch.user?.profile_pic,
+    cover: pickThumb(ls?.thumbnail),
+    online: ls?.viewer_count ?? 0,
+    category: ls?.categories?.[0]?.name ?? ch.recent_categories?.[0]?.name,
+    live: !!ls?.is_live,
+    link: `https://kick.com/${ch.slug ?? roomId}`,
+  };
+}
+
+export async function getLiveStatus(ctx, { roomId }) {
+  try {
+    const ch = await fetchChannel(ctx, roomId);
+    return !!ch.livestream?.is_live;
+  } catch {
+    return false;
+  }
+}
+
+export async function resolve(ctx, { roomId }) {
+  const ch = await fetchChannel(ctx, roomId);
+  const url = ch.playback_url ?? ch.livestream?.playback_url;
+  if (!url) throw new Error("Kick 未返回 playback_url（房间未开播）");
+  const alternatives = await fetchMasterAlternatives(ctx, url).catch(() => []);
+  const top = alternatives[0];
+  const defaultUrl = top?.url ?? url;
+  const alts = alternatives.length > 1
+    ? [
+        { qn: "auto", label: "自适应", url },
+        ...alternatives,
+      ]
+    : undefined;
   return ctx.protocols.hlsStream({
-    url: top?.url ?? playbackUrl,
+    url: defaultUrl,
     qn: top?.qn ?? "auto",
     qnLabel: top?.label ?? "自适应",
-    alternatives,
+    alternatives: alts,
     referer: REFERER,
     ua: UA,
   });
 }
 
-export async function getRecommend(ctx, { page, pageSize }) {
-  const limit = Math.max(pageSize, 25);
-  const res = await ctx.fetch(
-    `https://kick.com/api/v1/channels?page=${page}&limit=${limit}&sort=viewers`,
-    { headers: HEADERS, timeout: 20000 }
-  );
-  if (!res.ok) {
-    const res2 = await ctx.fetch(
-      `https://kick.com/api/v2/channels?page=${page}&limit=${limit}&sort=viewers&subcategory=&category=`,
-      { headers: HEADERS, timeout: 20000 }
-    );
-    if (!res2.ok) throw new Error(`Kick HTTP ${res2.status}`);
-    const data2 = await res2.json();
-    const channels2 = data2.data || data2.channels || data2 || [];
-    const list2 = channels2.map((ch) => mapChannel(ch)).filter((r) => r.roomId);
-    return { list: list2, hasMore: channels2.length >= limit };
+async function fetchMasterAlternatives(ctx, masterUrl) {
+  const res = await ctx.fetch(masterUrl, {
+    method: "GET",
+    headers: { "User-Agent": UA, Referer: REFERER },
+    timeout: 15000,
+    http2: true,
+  });
+  if (!res.ok) return [];
+  const text = await res.text();
+  const lines = text.split("\n");
+  const variants = [];
+  let pendingInf = null;
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (line.startsWith("#EXT-X-STREAM-INF:")) {
+      pendingInf = line;
+      continue;
+    }
+    if (pendingInf && line && !line.startsWith("#")) {
+      const bwM = pendingInf.match(/BANDWIDTH=([0-9]+)/);
+      const resM = pendingInf.match(/RESOLUTION=([0-9x]+)/);
+      const frM = pendingInf.match(/FRAME-RATE=([0-9.]+)/);
+      const bw = bwM ? parseInt(bwM[1], 10) : 0;
+      const resolution = resM ? resM[1] : "?";
+      const fr = frM ? Math.round(parseFloat(frM[1])) : 0;
+      const heightM = resolution.match(/x([0-9]+)/);
+      const heightLabel = heightM
+        ? `${heightM[1]}p${fr > 30 ? fr : ""}`
+        : resolution;
+      const absUrl = line.startsWith("http")
+        ? line
+        : new URL(line, masterUrl).toString();
+      variants.push({
+        bw,
+        qn: heightLabel || `${variants.length}`,
+        label: heightLabel || resolution,
+        url: absUrl,
+      });
+      pendingInf = null;
+    }
   }
-  const data = await res.json();
-  const channels = data.data || data.channels || data || [];
-  const list = channels.map((ch) => mapChannel(ch)).filter((r) => r.roomId);
-  return { list, hasMore: channels.length >= limit };
-}
-
-function mapChannel(ch) {
-  return {
-    platform: "kick",
-    roomId: ch.slug || ch.user?.username || "",
-    title: ch.livestream?.session_title || ch.slug || "",
-    uname: ch.user?.username || ch.slug,
-    cover: ch.livestream?.thumbnail?.url || ch.banner_image?.url,
-    online: ch.livestream?.viewer_count ?? 0,
-    category: ch.livestream?.categories?.[0]?.name,
-    live: !!ch.livestream,
-    link: `https://kick.com/${ch.slug}`,
-  };
-}
-
-export async function search(ctx, { keyword, page }) {
-  const res = await ctx.fetch(
-    `https://kick.com/api/v2/search?query=${encodeURIComponent(keyword)}`,
-    { headers: HEADERS, timeout: 20000 }
-  );
-  if (!res.ok) return { list: [], hasMore: false };
-  const data = await res.json();
-  const channels = data.channels || [];
-  const list = channels.map((ch) => ({
-    platform: "kick",
-    roomId: ch.slug || "",
-    title: ch.slug || "",
-    uname: ch.slug,
-    cover: ch.banner_image?.url,
-    online: ch.livestream?.viewer_count ?? 0,
-    live: !!ch.livestream,
-    link: `https://kick.com/${ch.slug}`,
-  })).filter((r) => r.roomId);
-  return { list, hasMore: false };
+  variants.sort((a, b) => b.bw - a.bw);
+  return variants.map(({ qn, label, url }) => ({ qn, label, url }));
 }

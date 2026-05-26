@@ -30,216 +30,216 @@ var __plugin__ = (() => {
     resolve: () => resolve,
     search: () => search
   });
-  var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
-  var REFERER = "https://cc.163.com/";
-  var HEADERS = {
-    "User-Agent": UA,
-    Referer: REFERER,
-    Accept: "application/json, text/plain, */*"
-  };
-  var CDN_PRIORITY = ["hs", "ks", "ali", "fws", "wy"];
   var manifest = {
     id: "cc",
-    label: "\u7F51\u6613 CC",
+    label: "\u7F51\u6613CC\u76F4\u64AD",
     version: "1.0.0",
-    defaultProxy: "direct",
     engine: { netliveApi: 1 }
   };
-  function mapRoom(r) {
-    if (!r.cuteid) return void 0;
+  var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36";
+  var HEADERS_BASE = {
+    "User-Agent": UA,
+    Referer: "https://cc.163.com/"
+  };
+  async function fetchJson(ctx, url) {
+    const res = await ctx.fetch(url, {
+      method: "GET",
+      headers: HEADERS_BASE,
+      timeout: 2e4
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status} ${url}`);
+    return res.json();
+  }
+  function parseWatching(v) {
+    if (v === void 0 || v === null) return void 0;
+    if (typeof v === "number") return v;
+    const n = parseInt(v, 10);
+    return isNaN(n) ? void 0 : n;
+  }
+  function mapLive(item, watchKey) {
+    if (item.cuteid === void 0 || item.cuteid === null) return void 0;
+    const rid = String(item.cuteid);
     return {
       platform: "cc",
-      roomId: String(r.cuteid),
-      title: r.title || r.nickname || String(r.cuteid),
-      uname: r.nickname || String(r.cuteid),
-      avatar: r.portrait || r.purl,
-      cover: r.cover || r.purl,
-      online: r.vision_visitor ?? r.visitor ?? 0,
-      category: r.game_name || r.gamename,
+      roomId: rid,
+      title: item.title ?? "",
+      cover: item.cover,
+      uname: item.nickname,
+      avatar: item.purl,
+      online: parseWatching(item[watchKey]),
+      category: item.game_name ?? "",
       live: true,
-      link: `https://cc.163.com/${r.cuteid}`
+      link: `https://cc.163.com/${rid}`
     };
   }
   async function getRecommend(ctx, { page, pageSize }) {
-    const size = Math.max(pageSize, 20);
-    const offset = (page - 1) * size;
-    const res = await ctx.fetch(
-      `https://cc.163.com/api/category/live/?format=json&start=${offset}&size=${size}`,
-      { headers: HEADERS, timeout: 25e3 }
+    const start = (page - 1) * 20;
+    const data = await fetchJson(
+      ctx,
+      `https://cc.163.com/api/category/live/?format=json&start=${start}&size=20`
     );
-    if (!res.ok) throw new Error(`CC HTTP ${res.status}`);
-    const data = await res.json();
-    const lives = data.lives || [];
-    return { list: lives.map(mapRoom).filter(Boolean), hasMore: lives.length >= size };
+    const items = data.lives ?? [];
+    const list = items.map((i) => mapLive(i, "vision_visitor")).filter((r) => !!r);
+    return { list, hasMore: items.length >= 20 };
   }
+  var PARENT_CATS = [
+    { id: "1", name: "\u5168\u90E8" },
+    { id: "2", name: "\u7AEF\u6E38", tag: "pc_game" },
+    { id: "4", name: "\u624B\u6E38", tag: "mobile_game" },
+    { id: "5", name: "\u5176\u4ED6", tag: "other" }
+  ];
   async function getCategories(ctx) {
-    const res = await ctx.fetch(
-      `https://cc.163.com/category/?format=json`,
-      { headers: HEADERS, timeout: 25e3 }
+    const data = await fetchJson(
+      ctx,
+      "https://cc.163.com/category/?format=json"
     );
-    if (!res.ok) throw new Error(`CC HTTP ${res.status}`);
-    const data = await res.json();
-    const gameList = data.game_list || [];
-    const categories = [];
-    const parents = [
-      { id: "all", name: "\u5168\u90E8" },
-      { id: "pc_game", name: "\u7AEF\u6E38" },
-      { id: "mobile_game", name: "\u624B\u6E38" },
-      { id: "other", name: "\u5176\u4ED6" }
-    ];
-    for (const p of parents) {
-      categories.push({ id: p.id, name: p.name, children: [] });
+    const all = data.game_list ?? [];
+    const out = [];
+    for (const parent of PARENT_CATS) {
+      const filtered = parent.tag ? all.filter((g) => g.game_tag === parent.tag) : all;
+      for (const g of filtered) {
+        if (g.gametype === void 0 || g.gametype === null) continue;
+        out.push({
+          id: String(g.gametype),
+          name: g.gamename ?? "",
+          cover: g.img,
+          parent: parent.name
+        });
+      }
     }
-    for (const g of gameList) {
-      categories.push({
-        id: String(g.gametype),
-        name: g.gamename || g.game_tag || String(g.gametype),
-        cover: g.img
-      });
-    }
-    return categories;
+    return out;
   }
   async function getCategoryRooms(ctx, { categoryId, page }) {
-    const res = await ctx.fetch(
-      `https://cc.163.com/_next/data/nextjs/category/${encodeURIComponent(categoryId)}.json`,
-      { headers: HEADERS, timeout: 25e3 }
+    const data = await fetchJson(
+      ctx,
+      `https://cc.163.com/_next/data/nextjs/category/${encodeURIComponent(categoryId)}.json?game=${encodeURIComponent(categoryId)}`
     );
-    if (!res.ok) throw new Error(`CC HTTP ${res.status}`);
-    const data = await res.json();
-    const lives = data.pageProps?.gametypeData?.lives || [];
-    return { list: lives.map(mapRoom).filter(Boolean), hasMore: false };
+    const items = data.pageProps?.gametypeData?.lives ?? [];
+    const list = items.map((i) => mapLive(i, "webcc_visitor")).filter((r) => !!r);
+    return { list, hasMore: false };
   }
   async function search(ctx, { keyword, page }) {
-    const p = page || 1;
-    const res = await ctx.fetch(
-      `https://cc.163.com/search/anchor?query=${encodeURIComponent(keyword)}&size=20&page=${p}`,
-      { headers: HEADERS, timeout: 25e3 }
+    const data = await fetchJson(
+      ctx,
+      `https://cc.163.com/search/anchor?query=${encodeURIComponent(keyword)}&size=20&page=${page}`
     );
-    if (!res.ok) return { list: [], hasMore: false };
-    const data = await res.json();
-    const results = data.webcc_anchor?.result || [];
-    const list = results.map((r) => ({
-      platform: "cc",
-      roomId: String(r.cuteid),
-      title: r.title || r.nickname || String(r.cuteid),
-      uname: r.nickname || String(r.cuteid),
-      avatar: r.portrait,
-      cover: r.portrait,
-      online: r.follower_num ?? 0,
-      category: r.game_name,
-      live: r.status === 1 || r.status === "1",
-      link: `https://cc.163.com/${r.cuteid}`
-    })).filter((r) => r.roomId);
-    return { list, hasMore: results.length >= 20 };
+    const items = data.webcc_anchor?.result ?? [];
+    const list = [];
+    for (const item of items) {
+      if (item.cuteid === void 0 || item.cuteid === null) continue;
+      const rid = String(item.cuteid);
+      list.push({
+        platform: "cc",
+        roomId: rid,
+        title: item.title ?? "",
+        cover: item.portrait,
+        uname: item.nickname,
+        avatar: item.portrait,
+        online: parseWatching(item.follower_num),
+        category: item.game_name ?? "",
+        live: item.status === 1,
+        link: `https://cc.163.com/${rid}`
+      });
+    }
+    return { list, hasMore: items.length > 0 };
   }
   async function fetchChannelInfo(ctx, roomId) {
-    const endpoints = [
-      `https://cc.163.com/live/channel/?channelids=${encodeURIComponent(roomId)}`,
+    const anchorResp = await fetchJson(
+      ctx,
       `https://api.cc.163.com/v1/activitylives/anchor/lives?anchor_ccid=${encodeURIComponent(roomId)}`
-    ];
-    try {
-      const chRes = await ctx.fetch(
-        `https://cc.163.com/live/channel/?channelids=${encodeURIComponent(roomId)}`,
-        { headers: HEADERS, timeout: 25e3 }
-      );
-      if (chRes.ok) {
-        const chData = await chRes.json();
-        const channel = chData.data?.[0] || chData.data?.[roomId];
-        if (channel) return channel;
-      }
-    } catch {
+    );
+    const channelId = anchorResp.data?.[roomId]?.channel_id;
+    if (channelId === void 0 || channelId === null) {
+      throw new Error("CC \u672A\u8FD4\u56DE channel_id\uFF08\u623F\u95F4\u53EF\u80FD\u672A\u5F00\u64AD\uFF09");
     }
-    try {
-      const pageRes = await ctx.fetch(`https://cc.163.com/${roomId}`, {
-        headers: { ...HEADERS, Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" },
-        timeout: 25e3
-      });
-      if (pageRes.ok) {
-        const html = await pageRes.text();
-        const m = html.match(/window\.__NEXT_DATA__\s*=\s*(\{[\s\S]*?\});\s*<\/script>/) || html.match(/"props"\s*:\s*(\{[\s\S]*?"channelInfo"[\s\S]*?\})\s*[,}]/);
-        if (m) {
-          try {
-            const nextData = JSON.parse(m[1]);
-            const channelInfo = nextData?.props?.pageProps?.roomInfoInitData?.live?.channelInfo || nextData?.props?.pageProps?.channelInfo;
-            if (channelInfo) return channelInfo;
-          } catch {
-          }
-        }
-        const m3u8Match = html.match(/(https?:\/\/[^"'\s]+\.m3u8[^"'\s]*)/);
-        if (m3u8Match) {
-          return { m3u8: m3u8Match[1], title: roomId, nickname: roomId, status: 1 };
-        }
-      }
-    } catch {
-    }
-    throw new Error(`CC \u623F\u95F4 ${roomId} \u672A\u627E\u5230\u6216\u672A\u5F00\u64AD`);
+    const channelResp = await fetchJson(
+      ctx,
+      `https://cc.163.com/live/channel/?channelids=${encodeURIComponent(String(channelId))}`
+    );
+    return channelResp.data;
   }
   async function getRoomDetail(ctx, { roomId }) {
-    const ch = await fetchChannelInfo(ctx, roomId);
+    const data = await fetchChannelInfo(ctx, roomId);
+    const r = data?.[0];
+    if (!r) throw new Error("CC \u672A\u8FD4\u56DE\u623F\u95F4\u6570\u636E");
     return {
       platform: "cc",
-      roomId,
-      title: ch.title || ch.nickname || roomId,
-      uname: ch.nickname || roomId,
-      avatar: ch.purl,
-      cover: ch.cover || ch.purl,
-      online: ch.visitor ?? 0,
-      category: ch.gamename || ch.game_name,
-      live: ch.status === 1 || ch.status === "1",
+      roomId: String(r.ccid ?? roomId),
+      title: r.title ?? "",
+      cover: r.cover,
+      uname: r.nickname,
+      avatar: r.purl,
+      online: parseWatching(r.follower_num),
+      category: r.gamename,
+      live: r.status === 1,
       link: `https://cc.163.com/${roomId}`
     };
   }
+  var QUALITY_LABELS = {
+    blueray: "\u539F\u753B",
+    original: "\u539F\u753B",
+    high: "\u9AD8\u6E05",
+    medium: "\u6807\u51C6",
+    standard: "\u6807\u51C6",
+    low: "\u4F4E\u6E05",
+    ultra: "\u84DD\u5149"
+  };
+  var LINE_PRIORITY = ["hs", "ks", "ali", "fws", "wy"];
+  function pickCcStream(detail) {
+    const dataSource = detail.quickplay ?? detail.stream_list;
+    if (!dataSource) return { primary: "", alts: [] };
+    const link = detail.m3u8;
+    const dataObj = dataSource;
+    const isLiveStream = dataObj.resolution === void 0 || dataObj.resolution === null;
+    const qualityMap = isLiveStream ? dataObj : dataObj.resolution ?? {};
+    const alts = [];
+    for (const [key, q] of Object.entries(qualityMap)) {
+      if (!q || typeof q !== "object") continue;
+      const label = QUALITY_LABELS[key] ?? key;
+      const vbr = q.vbr ?? 0;
+      const lineMap = isLiveStream ? q.CDN_FMT ?? {} : q.cdn ?? {};
+      let chosen;
+      for (const line of LINE_PRIORITY) {
+        const lineVal = lineMap[line];
+        if (!lineVal) continue;
+        if (isLiveStream) {
+          if (!link) continue;
+          chosen = `${link}&${lineVal}`;
+        } else {
+          chosen = lineVal;
+        }
+        break;
+      }
+      if (chosen) {
+        alts.push({ qn: String(vbr), label, url: chosen });
+      }
+    }
+    alts.sort((a, b) => parseInt(b.qn, 10) - parseInt(a.qn, 10));
+    return { primary: alts[0]?.url ?? "", alts };
+  }
+  async function resolve(ctx, { roomId }) {
+    const data = await fetchChannelInfo(ctx, roomId);
+    const r = data?.[0];
+    if (!r) throw new Error("CC \u672A\u8FD4\u56DE\u623F\u95F4\u6570\u636E");
+    if (r.status !== 1) throw new Error("CC \u76F4\u64AD\u95F4\u672A\u5F00\u64AD");
+    const picked = pickCcStream(r);
+    if (!picked.primary) throw new Error("CC \u672A\u5339\u914D\u5230\u53EF\u64AD\u6D41");
+    return ctx.protocols.hlsStream({
+      url: picked.primary,
+      qn: picked.alts[0]?.qn,
+      qnLabel: picked.alts[0]?.label,
+      alternatives: picked.alts.length > 0 ? picked.alts : void 0,
+      referer: "https://cc.163.com/",
+      ua: UA
+    });
+  }
   async function getLiveStatus(ctx, { roomId }) {
     try {
-      const ch = await fetchChannelInfo(ctx, roomId);
-      return ch.status === 1 || ch.status === "1";
+      const detail = await getRoomDetail(ctx, { roomId });
+      return detail.live;
     } catch {
       return false;
     }
-  }
-  async function resolve(ctx, { roomId }) {
-    const ch = await fetchChannelInfo(ctx, roomId);
-    if (ch.status !== 1 && ch.status !== "1") throw new Error(`CC \u4E3B\u64AD ${roomId} \u672A\u5728\u76F4\u64AD`);
-    const m3u8Base = ch.m3u8;
-    if (!m3u8Base) throw new Error("CC \u672A\u8FD4\u56DE m3u8 \u5730\u5740");
-    const quickplay = ch.quickplay || {};
-    const streamList = ch.stream_list || quickplay;
-    const qualityOrder = ["blueray", "original", "high", "medium"];
-    const alternatives = [];
-    for (const qName of qualityOrder) {
-      const qData = streamList[qName] || quickplay[qName];
-      if (!qData) continue;
-      let tail = null;
-      for (const cdn of CDN_PRIORITY) {
-        if (qData[cdn]) {
-          tail = qData[cdn];
-          break;
-        }
-      }
-      if (!tail) {
-        const keys = Object.keys(qData).filter((k) => typeof qData[k] === "string" && qData[k].length > 0);
-        if (keys.length > 0) tail = qData[keys[0]];
-      }
-      if (!tail) continue;
-      const url = m3u8Base + (tail.startsWith("&") ? tail : "&" + tail);
-      const labelMap = { blueray: "\u84DD\u5149", original: "\u539F\u753B", high: "\u9AD8\u6E05", medium: "\u6807\u6E05" };
-      alternatives.push({
-        qn: qName,
-        label: labelMap[qName] || qName,
-        url
-      });
-    }
-    const bestUrl = alternatives.length > 0 ? alternatives[0].url : m3u8Base;
-    const bestLabel = alternatives.length > 0 ? alternatives[0].label : "\u539F\u753B";
-    const bestQn = alternatives.length > 0 ? alternatives[0].qn : "original";
-    return ctx.protocols.hlsStream({
-      url: bestUrl,
-      qn: bestQn,
-      qnLabel: bestLabel,
-      alternatives: alternatives.length > 1 ? alternatives : void 0,
-      referer: REFERER,
-      ua: UA
-    });
   }
   return __toCommonJS(cc_exports);
 })();

@@ -12,7 +12,7 @@
     "label": "Bigo Live",
     "version": "1.0.0",
     "adult": false,
-    "defaultProxy": "proxy",
+    "defaultProxy": "direct",
     "file": "bigo.js"
   },
   {
@@ -28,7 +28,7 @@
     "label": "BongaCams",
     "version": "1.0.0",
     "adult": true,
-    "defaultProxy": "proxy",
+    "defaultProxy": "direct",
     "file": "bongacams.js"
   },
   {
@@ -36,7 +36,7 @@
     "label": "Cam4",
     "version": "1.0.0",
     "adult": true,
-    "defaultProxy": "proxy",
+    "defaultProxy": "direct",
     "file": "cam4.js"
   },
   {
@@ -52,12 +52,12 @@
     "label": "CamSoda",
     "version": "1.0.0",
     "adult": true,
-    "defaultProxy": "proxy",
+    "defaultProxy": "direct",
     "file": "camsoda.js"
   },
   {
     "id": "cc",
-    "label": "网易 CC",
+    "label": "网易CC直播",
     "version": "1.0.0",
     "adult": false,
     "defaultProxy": "direct",
@@ -116,7 +116,7 @@
     "label": "Flirt4Free",
     "version": "1.0.0",
     "adult": true,
-    "defaultProxy": "proxy",
+    "defaultProxy": "direct",
     "file": "flirt4free.js"
   },
   {
@@ -132,12 +132,12 @@
     "label": "Kick",
     "version": "1.0.0",
     "adult": false,
-    "defaultProxy": "proxy",
+    "defaultProxy": "direct",
     "file": "kick.js"
   },
   {
     "id": "kuaishou",
-    "label": "快手",
+    "label": "快手直播",
     "version": "1.0.0",
     "adult": false,
     "defaultProxy": "direct",
@@ -148,7 +148,7 @@
     "label": "17 Live",
     "version": "1.0.0",
     "adult": false,
-    "defaultProxy": "proxy",
+    "defaultProxy": "direct",
     "file": "live17.js"
   },
   {
@@ -164,23 +164,23 @@
     "label": "MyFreeCams",
     "version": "1.0.0",
     "adult": true,
-    "defaultProxy": "proxy",
+    "defaultProxy": "direct",
     "file": "myfreecams.js"
   },
   {
     "id": "pandalive",
-    "label": "PandaTV (韩国 BJ)",
+    "label": "Pandalive",
     "version": "1.0.0",
     "adult": true,
-    "defaultProxy": "proxy",
+    "defaultProxy": "direct",
     "file": "pandalive.js"
   },
   {
     "id": "sexchathu",
-    "label": "SexChat HU",
+    "label": "SexChat.hu",
     "version": "1.0.0",
     "adult": true,
-    "defaultProxy": "proxy",
+    "defaultProxy": "direct",
     "file": "sexchathu.js"
   },
   {
