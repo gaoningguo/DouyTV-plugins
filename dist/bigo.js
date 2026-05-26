@@ -32,8 +32,8 @@ var __plugin__ = (() => {
   });
   var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
   var REFERER = "https://www.bigo.tv/";
-  var HEADERS = { "User-Agent": UA, Referer: REFERER, Origin: "https://www.bigo.tv", Accept: "application/json, text/plain, */*", "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8" };
-  var HTML_HEADERS = { "User-Agent": UA, Referer: REFERER, Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8" };
+  var HEADERS = { "User-Agent": UA, Referer: REFERER, Origin: "https://www.bigo.tv", Accept: "application/json, text/plain, */*", "Accept-Language": "en-US,en;q=0.9" };
+  var HTML_HEADERS = { "User-Agent": UA, Referer: REFERER, Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", "Accept-Language": "en-US,en;q=0.9" };
   var manifest = {
     id: "bigo",
     label: "Bigo Live",
@@ -59,7 +59,7 @@ var __plugin__ = (() => {
     };
   }
   async function getJson(ctx, url) {
-    const res = await ctx.fetch(url, { headers: HEADERS, timeout: 25e3, http2: true });
+    const res = await ctx.fetch(url, { headers: HEADERS, timeout: 25e3 });
     if (!res.ok) throw new Error(`Bigo HTTP ${res.status}`);
     return res.json();
   }
@@ -68,8 +68,7 @@ var __plugin__ = (() => {
       method: "POST",
       headers: { ...HEADERS, "Content-Type": "application/json" },
       body: JSON.stringify(body),
-      timeout: 25e3,
-      http2: true
+      timeout: 25e3
     });
     if (!res.ok) throw new Error(`Bigo HTTP ${res.status}`);
     return res.json();
@@ -145,13 +144,12 @@ var __plugin__ = (() => {
       const res = await ctx.fetch(url, {
         method: "POST",
         headers: { ...HEADERS, "Content-Length": "0" },
-        timeout: 25e3,
-        http2: true
+        timeout: 25e3
       });
       if (!res.ok) throw new Error(`Bigo HTTP ${res.status}`);
       return res.json();
     } catch {
-      const r = await ctx.fetch(`https://www.bigo.tv/${roomId}`, { headers: HTML_HEADERS, timeout: 25e3, http2: true });
+      const r = await ctx.fetch(`https://www.bigo.tv/${roomId}`, { headers: HTML_HEADERS, timeout: 25e3 });
       if (!r.ok) throw new Error(`Bigo HTTP ${r.status}`);
       const html = await r.text();
       const state = extractInitState(html);

@@ -6,7 +6,7 @@
  */
 const REFERER = "https://www.camsoda.com/";
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
-const HEADERS = { "User-Agent": UA, Referer: REFERER, Origin: "https://www.camsoda.com", Accept: "application/json" };
+const HEADERS = { "User-Agent": UA, Referer: REFERER, Origin: "https://www.camsoda.com", Accept: "application/json, text/plain, */*", "Accept-Language": "en-US,en;q=0.9", "X-Requested-With": "XMLHttpRequest" };
 
 export const manifest = {
   id: "camsoda",

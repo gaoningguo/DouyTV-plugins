@@ -75,15 +75,29 @@ export async function resolve(ctx, { roomId }) {
 
 export async function getRecommend(ctx, { page, pageSize }) {
   const limit = Math.max(pageSize, 25);
-  const offset = (page - 1) * limit;
   const res = await ctx.fetch(
-    `https://kick.com/api/v2/channels?page=${page}&limit=${limit}&sort=viewers&subcategory=&category=`,
+    `https://kick.com/api/v1/channels?page=${page}&limit=${limit}&sort=viewers`,
     { headers: HEADERS, timeout: 20000 }
   );
-  if (!res.ok) throw new Error(`Kick HTTP ${res.status}`);
+  if (!res.ok) {
+    const res2 = await ctx.fetch(
+      `https://kick.com/api/v2/channels?page=${page}&limit=${limit}&sort=viewers&subcategory=&category=`,
+      { headers: HEADERS, timeout: 20000 }
+    );
+    if (!res2.ok) throw new Error(`Kick HTTP ${res2.status}`);
+    const data2 = await res2.json();
+    const channels2 = data2.data || data2.channels || data2 || [];
+    const list2 = channels2.map((ch) => mapChannel(ch)).filter((r) => r.roomId);
+    return { list: list2, hasMore: channels2.length >= limit };
+  }
   const data = await res.json();
   const channels = data.data || data.channels || data || [];
-  const list = channels.map((ch) => ({
+  const list = channels.map((ch) => mapChannel(ch)).filter((r) => r.roomId);
+  return { list, hasMore: channels.length >= limit };
+}
+
+function mapChannel(ch) {
+  return {
     platform: "kick",
     roomId: ch.slug || ch.user?.username || "",
     title: ch.livestream?.session_title || ch.slug || "",
@@ -93,8 +107,7 @@ export async function getRecommend(ctx, { page, pageSize }) {
     category: ch.livestream?.categories?.[0]?.name,
     live: !!ch.livestream,
     link: `https://kick.com/${ch.slug}`,
-  })).filter((r) => r.roomId);
-  return { list, hasMore: channels.length >= limit };
+  };
 }
 
 export async function search(ctx, { keyword, page }) {

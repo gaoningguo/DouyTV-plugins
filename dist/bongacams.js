@@ -57,7 +57,13 @@ var __plugin__ = (() => {
       { headers: HEADERS, timeout: 25e3 }
     );
     if (!res.ok) throw new Error(`BongaCams HTTP ${res.status}`);
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error(`BongaCams \u8FD4\u56DE\u975E JSON: ${text.slice(0, 80)}`);
+    }
     const models = Array.isArray(data) ? data : [];
     const list = models.map((m) => ({
       platform: "bongacams",

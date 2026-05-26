@@ -65,8 +65,7 @@ var __plugin__ = (() => {
     const qs = new URLSearchParams({ count: String(count ?? 20), cursor: "", paging: "1", region: "SG", tab: tab ?? "hot_opt" });
     const res = await ctx.fetch(`https://wap-api.17app.co/api/v1/cells?${qs.toString()}`, {
       headers: HEADERS,
-      timeout: 25e3,
-      http2: true
+      timeout: 25e3
     });
     if (!res.ok) throw new Error(`17Live HTTP ${res.status}`);
     const data = await res.json();
@@ -106,8 +105,7 @@ var __plugin__ = (() => {
   async function fetchRoom(ctx, roomId) {
     const res = await ctx.fetch("https://wap-api.17app.co/api/v1/cells?count=50&cursor=&paging=1&region=SG&tab=hot_opt", {
       headers: HEADERS,
-      timeout: 25e3,
-      http2: true
+      timeout: 25e3
     });
     if (!res.ok) return null;
     const data = await res.json();

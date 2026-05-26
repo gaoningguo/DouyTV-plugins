@@ -40,7 +40,7 @@ function mapStream(s) {
 async function fetchCells(ctx, tab, count) {
   const qs = new URLSearchParams({ count: String(count ?? 20), cursor: "", paging: "1", region: "SG", tab: tab ?? "hot_opt" });
   const res = await ctx.fetch(`https://wap-api.17app.co/api/v1/cells?${qs.toString()}`, {
-    headers: HEADERS, timeout: 25000, http2: true,
+    headers: HEADERS, timeout: 25000,
   });
   if (!res.ok) throw new Error(`17Live HTTP ${res.status}`);
   const data = await res.json();
@@ -84,7 +84,7 @@ export async function search(ctx, { keyword }) {
 
 async function fetchRoom(ctx, roomId) {
   const res = await ctx.fetch("https://wap-api.17app.co/api/v1/cells?count=50&cursor=&paging=1&region=SG&tab=hot_opt", {
-    headers: HEADERS, timeout: 25000, http2: true,
+    headers: HEADERS, timeout: 25000,
   });
   if (!res.ok) return null;
   const data = await res.json();

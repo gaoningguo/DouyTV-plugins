@@ -5,7 +5,7 @@
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 const REFERER = "https://www.cam4.com/";
 const HEADERS = { "User-Agent": UA, Referer: REFERER, Origin: "https://www.cam4.com", Accept: "application/json, text/plain, */*", "Accept-Language": "en-US,en;q=0.9", "Content-Type": "application/json" };
-const GRAPH_URL = "https://cam4.com/graph?operation=getGenderPreferencePageData&ssr=false";
+const GRAPH_URL = "https://www.cam4.com/graph?operation=getGenderPreferencePageData&ssr=false";
 
 const cache = new Map();
 const TTL = 60000;
@@ -27,7 +27,7 @@ async function fetchGraph(ctx, gender, offset, first) {
     variables: { input: { orderBy: "trending", filters: [], gender, cursor: { first, offset } }, keys: ["directory.tab.female"] },
     query: QUERY,
   };
-  const res = await ctx.fetch(GRAPH_URL, { method: "POST", headers: HEADERS, body: JSON.stringify(body), timeout: 25000, http2: true });
+  const res = await ctx.fetch(GRAPH_URL, { method: "POST", headers: HEADERS, body: JSON.stringify(body), timeout: 25000 });
   if (!res.ok) throw new Error(`Cam4 HTTP ${res.status}`);
   const json = await res.json();
   if (json.errors?.length) throw new Error(`Cam4: ${json.errors.map((e) => e.message).join(",")}`);

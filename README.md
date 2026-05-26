@@ -89,19 +89,20 @@ return {
   async resolve(ctx, { roomId }) {
     const data = await ctx.fetch(`https://api.example.com/room/${roomId}`);
     const json = await data.json();
-    return ctx.protocols.hlsStream(json.streamUrl, {
-      headers: { Referer: "https://example.com" },
+    return ctx.protocols.hlsStream({
+      url: json.streamUrl,
+      referer: "https://example.com",
     });
   },
 
   // 可选：推荐列表
   async getRecommend(ctx, { page, pageSize }) {
-    // return { items: [...], hasMore: true }
+    // return { list: [...], hasMore: true }
   },
 
   // 可选：搜索
   async search(ctx, { keyword, page }) {
-    // return { items: [...], hasMore: true }
+    // return { list: [...], hasMore: true }
   },
 
   // 可选：分类列表
@@ -111,7 +112,7 @@ return {
 
   // 可选：分类下的房间
   async getCategoryRooms(ctx, { categoryId, page }) {
-    // return { items: [...], hasMore: true }
+    // return { list: [...], hasMore: true }
   },
 
   // 可选：房间详情

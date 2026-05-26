@@ -28,7 +28,7 @@ var __plugin__ = (() => {
   });
   var REFERER = "https://www.camsoda.com/";
   var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
-  var HEADERS = { "User-Agent": UA, Referer: REFERER, Origin: "https://www.camsoda.com", Accept: "application/json" };
+  var HEADERS = { "User-Agent": UA, Referer: REFERER, Origin: "https://www.camsoda.com", Accept: "application/json, text/plain, */*", "Accept-Language": "en-US,en;q=0.9", "X-Requested-With": "XMLHttpRequest" };
   var manifest = {
     id: "camsoda",
     label: "CamSoda",

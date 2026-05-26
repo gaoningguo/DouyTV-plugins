@@ -127,9 +127,21 @@ export async function getCategoryRooms(ctx, { categoryId, page }) {
 }
 
 function extractInitialState(html) {
-  const m = html.match(/window\.__INITIAL_STATE__\s*=\s*(\{[\s\S]*?\});\s*(?:<\/script>|window\.)/);
-  if (!m) return null;
-  try { return JSON.parse(m[1]); } catch { return null; }
+  const patterns = [
+    /window\.__INITIAL_STATE__\s*=\s*(\{[\s\S]*?\});\s*(?:<\/script>|window\.)/,
+    /window\.__INITIAL_STATE__\s*=\s*(\{[\s\S]*?\})\s*;?\s*<\/script>/,
+    /__INITIAL_STATE__\s*=\s*JSON\.parse\('([\s\S]*?)'\)/,
+    /window\.__NUXT__\s*=\s*(\{[\s\S]*?\});\s*<\/script>/,
+  ];
+  for (const pat of patterns) {
+    const m = html.match(pat);
+    if (!m) continue;
+    try {
+      const raw = m[1].startsWith("{") ? m[1] : m[1].replace(/\\'/g, "'").replace(/\\"/g, '"');
+      return JSON.parse(raw);
+    } catch { continue; }
+  }
+  return null;
 }
 
 async function fetchRoomHtml(ctx, roomId) {

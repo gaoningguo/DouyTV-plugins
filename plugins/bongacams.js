@@ -40,7 +40,9 @@ export async function getRecommend(ctx, { page, pageSize }) {
     { headers: HEADERS, timeout: 25000 }
   );
   if (!res.ok) throw new Error(`BongaCams HTTP ${res.status}`);
-  const data = await res.json();
+  const text = await res.text();
+  let data;
+  try { data = JSON.parse(text); } catch { throw new Error(`BongaCams 返回非 JSON: ${text.slice(0, 80)}`); }
   const models = Array.isArray(data) ? data : [];
   const list = models.map((m) => ({
     platform: "bongacams",

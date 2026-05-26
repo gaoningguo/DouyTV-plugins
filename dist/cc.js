@@ -133,25 +133,46 @@ var __plugin__ = (() => {
     return { list, hasMore: results.length >= 20 };
   }
   async function fetchChannelInfo(ctx, roomId) {
-    const anchorRes = await ctx.fetch(
-      `https://cc.163.com/v1/activitylives/anchor/lives?anchor_ccid=${encodeURIComponent(roomId)}`,
-      { headers: HEADERS, timeout: 25e3 }
-    );
-    if (!anchorRes.ok) throw new Error(`CC HTTP ${anchorRes.status}`);
-    const anchorData = await anchorRes.json();
-    const roomInfo = anchorData.data?.[roomId] || anchorData.data?.[String(roomId)];
-    if (!roomInfo) throw new Error(`CC \u623F\u95F4 ${roomId} \u672A\u627E\u5230`);
-    const channelId = roomInfo.channel_id;
-    if (!channelId) throw new Error(`CC \u623F\u95F4 ${roomId} \u65E0 channel_id`);
-    const chRes = await ctx.fetch(
-      `https://cc.163.com/live/channel/?channelids=${channelId}`,
-      { headers: HEADERS, timeout: 25e3 }
-    );
-    if (!chRes.ok) throw new Error(`CC HTTP ${chRes.status}`);
-    const chData = await chRes.json();
-    const channel = chData.data?.[0] || chData.data?.[channelId];
-    if (!channel) throw new Error(`CC channel ${channelId} \u6570\u636E\u7F3A\u5931`);
-    return channel;
+    const endpoints = [
+      `https://cc.163.com/live/channel/?channelids=${encodeURIComponent(roomId)}`,
+      `https://api.cc.163.com/v1/activitylives/anchor/lives?anchor_ccid=${encodeURIComponent(roomId)}`
+    ];
+    try {
+      const chRes = await ctx.fetch(
+        `https://cc.163.com/live/channel/?channelids=${encodeURIComponent(roomId)}`,
+        { headers: HEADERS, timeout: 25e3 }
+      );
+      if (chRes.ok) {
+        const chData = await chRes.json();
+        const channel = chData.data?.[0] || chData.data?.[roomId];
+        if (channel) return channel;
+      }
+    } catch {
+    }
+    try {
+      const pageRes = await ctx.fetch(`https://cc.163.com/${roomId}`, {
+        headers: { ...HEADERS, Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" },
+        timeout: 25e3
+      });
+      if (pageRes.ok) {
+        const html = await pageRes.text();
+        const m = html.match(/window\.__NEXT_DATA__\s*=\s*(\{[\s\S]*?\});\s*<\/script>/) || html.match(/"props"\s*:\s*(\{[\s\S]*?"channelInfo"[\s\S]*?\})\s*[,}]/);
+        if (m) {
+          try {
+            const nextData = JSON.parse(m[1]);
+            const channelInfo = nextData?.props?.pageProps?.roomInfoInitData?.live?.channelInfo || nextData?.props?.pageProps?.channelInfo;
+            if (channelInfo) return channelInfo;
+          } catch {
+          }
+        }
+        const m3u8Match = html.match(/(https?:\/\/[^"'\s]+\.m3u8[^"'\s]*)/);
+        if (m3u8Match) {
+          return { m3u8: m3u8Match[1], title: roomId, nickname: roomId, status: 1 };
+        }
+      }
+    } catch {
+    }
+    throw new Error(`CC \u623F\u95F4 ${roomId} \u672A\u627E\u5230\u6216\u672A\u5F00\u64AD`);
   }
   async function getRoomDetail(ctx, { roomId }) {
     const ch = await fetchChannelInfo(ctx, roomId);

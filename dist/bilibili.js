@@ -6600,7 +6600,7 @@ var __plugin__ = (() => {
     resolve: () => resolve,
     search: () => search
   });
-  var import_crypto_js = __toESM(require_crypto_js());
+  var import_crypto_js = __toESM(require_crypto_js(), 1);
   var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0";
   var REFERER = "https://live.bilibili.com/";
   var cachedBuvid3 = "";
