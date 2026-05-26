@@ -1,0 +1,242 @@
+[
+  {
+    "id": "amateurtv",
+    "label": "AmateurTV",
+    "version": "1.0.0",
+    "adult": true,
+    "defaultProxy": "proxy",
+    "file": "amateurtv.js"
+  },
+  {
+    "id": "bigo",
+    "label": "Bigo Live",
+    "version": "1.0.0",
+    "adult": false,
+    "defaultProxy": "proxy",
+    "file": "bigo.js"
+  },
+  {
+    "id": "bilibili",
+    "label": "哔哩哔哩",
+    "version": "1.0.0",
+    "adult": false,
+    "defaultProxy": "direct",
+    "file": "bilibili.js"
+  },
+  {
+    "id": "bongacams",
+    "label": "BongaCams",
+    "version": "1.0.0",
+    "adult": true,
+    "defaultProxy": "proxy",
+    "file": "bongacams.js"
+  },
+  {
+    "id": "cam4",
+    "label": "Cam4",
+    "version": "1.0.0",
+    "adult": true,
+    "defaultProxy": "proxy",
+    "file": "cam4.js"
+  },
+  {
+    "id": "camscom",
+    "label": "Cams.com",
+    "version": "1.0.0",
+    "adult": true,
+    "defaultProxy": "proxy",
+    "file": "camscom.js"
+  },
+  {
+    "id": "camsoda",
+    "label": "CamSoda",
+    "version": "1.0.0",
+    "adult": true,
+    "defaultProxy": "proxy",
+    "file": "camsoda.js"
+  },
+  {
+    "id": "cc",
+    "label": "网易 CC",
+    "version": "1.0.0",
+    "adult": false,
+    "defaultProxy": "direct",
+    "file": "cc.js"
+  },
+  {
+    "id": "chaturbate",
+    "label": "Chaturbate",
+    "version": "1.0.0",
+    "adult": true,
+    "defaultProxy": "proxy",
+    "file": "chaturbate.js"
+  },
+  {
+    "id": "douyin",
+    "label": "抖音",
+    "version": "1.0.0",
+    "adult": false,
+    "defaultProxy": "direct",
+    "file": "douyin.js"
+  },
+  {
+    "id": "douyu",
+    "label": "斗鱼",
+    "version": "1.0.0",
+    "adult": false,
+    "defaultProxy": "direct",
+    "file": "douyu.js"
+  },
+  {
+    "id": "dreamcam",
+    "label": "DreamCam",
+    "version": "1.0.0",
+    "adult": true,
+    "defaultProxy": "proxy",
+    "file": "dreamcam.js"
+  },
+  {
+    "id": "fansly",
+    "label": "Fansly Live",
+    "version": "1.0.0",
+    "adult": true,
+    "defaultProxy": "proxy",
+    "file": "fansly.js"
+  },
+  {
+    "id": "fc2live",
+    "label": "FC2 Live (日本 BJ)",
+    "version": "1.0.0",
+    "adult": true,
+    "defaultProxy": "proxy",
+    "file": "fc2live.js"
+  },
+  {
+    "id": "flirt4free",
+    "label": "Flirt4Free",
+    "version": "1.0.0",
+    "adult": true,
+    "defaultProxy": "proxy",
+    "file": "flirt4free.js"
+  },
+  {
+    "id": "huya",
+    "label": "虎牙",
+    "version": "1.0.0",
+    "adult": false,
+    "defaultProxy": "direct",
+    "file": "huya.js"
+  },
+  {
+    "id": "kick",
+    "label": "Kick",
+    "version": "1.0.0",
+    "adult": false,
+    "defaultProxy": "proxy",
+    "file": "kick.js"
+  },
+  {
+    "id": "kuaishou",
+    "label": "快手",
+    "version": "1.0.0",
+    "adult": false,
+    "defaultProxy": "direct",
+    "file": "kuaishou.js"
+  },
+  {
+    "id": "live17",
+    "label": "17 Live",
+    "version": "1.0.0",
+    "adult": false,
+    "defaultProxy": "proxy",
+    "file": "live17.js"
+  },
+  {
+    "id": "manyvids",
+    "label": "ManyVids",
+    "version": "1.0.0",
+    "adult": true,
+    "defaultProxy": "proxy",
+    "file": "manyvids.js"
+  },
+  {
+    "id": "myfreecams",
+    "label": "MyFreeCams",
+    "version": "1.0.0",
+    "adult": true,
+    "defaultProxy": "proxy",
+    "file": "myfreecams.js"
+  },
+  {
+    "id": "pandalive",
+    "label": "PandaTV (韩国 BJ)",
+    "version": "1.0.0",
+    "adult": true,
+    "defaultProxy": "proxy",
+    "file": "pandalive.js"
+  },
+  {
+    "id": "sexchathu",
+    "label": "SexChat HU",
+    "version": "1.0.0",
+    "adult": true,
+    "defaultProxy": "proxy",
+    "file": "sexchathu.js"
+  },
+  {
+    "id": "soop",
+    "label": "SOOP (韩国 BJ)",
+    "version": "1.0.0",
+    "adult": true,
+    "defaultProxy": "proxy",
+    "file": "soop.js"
+  },
+  {
+    "id": "streamate",
+    "label": "Streamate",
+    "version": "1.0.0",
+    "adult": true,
+    "defaultProxy": "proxy",
+    "file": "streamate.js"
+  },
+  {
+    "id": "stripchat",
+    "label": "Stripchat",
+    "version": "1.0.0",
+    "adult": true,
+    "defaultProxy": "proxy",
+    "file": "stripchat.js"
+  },
+  {
+    "id": "trovo",
+    "label": "Trovo",
+    "version": "1.0.0",
+    "adult": false,
+    "defaultProxy": "proxy",
+    "file": "trovo.js"
+  },
+  {
+    "id": "twitch",
+    "label": "Twitch",
+    "version": "1.0.0",
+    "adult": false,
+    "defaultProxy": "proxy",
+    "file": "twitch.js"
+  },
+  {
+    "id": "xlovecam",
+    "label": "XLoveCam",
+    "version": "1.0.0",
+    "adult": true,
+    "defaultProxy": "proxy",
+    "file": "xlovecam.js"
+  },
+  {
+    "id": "youtube",
+    "label": "YouTube",
+    "version": "1.0.0",
+    "adult": false,
+    "defaultProxy": "proxy",
+    "file": "youtube.js"
+  }
+]

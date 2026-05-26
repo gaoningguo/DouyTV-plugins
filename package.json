@@ -1,0 +1,17 @@
+{
+  "name": "douytv-plugins",
+  "version": "1.0.0",
+  "description": "DouyTV 网络直播插件库 —— 每个平台一个独立 JS 插件文件",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:one": "node scripts/build.mjs --only"
+  },
+  "dependencies": {
+    "crypto-js": "^4.2.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.0"
+  }
+}
