@@ -37,9 +37,9 @@ var __plugin__ = (() => {
   ));
   var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-  // node_modules/crypto-js/core.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/core.js
   var require_core = __commonJS({
-    "node_modules/crypto-js/core.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/core.js"(exports, module) {
       (function(root, factory) {
         if (typeof exports === "object") {
           module.exports = exports = factory();
@@ -645,9 +645,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/x64-core.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/x64-core.js
   var require_x64_core = __commonJS({
-    "node_modules/crypto-js/x64-core.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/x64-core.js"(exports, module) {
       (function(root, factory) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core());
@@ -902,9 +902,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/lib-typedarrays.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/lib-typedarrays.js
   var require_lib_typedarrays = __commonJS({
-    "node_modules/crypto-js/lib-typedarrays.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/lib-typedarrays.js"(exports, module) {
       (function(root, factory) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core());
@@ -947,9 +947,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/enc-utf16.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/enc-utf16.js
   var require_enc_utf16 = __commonJS({
-    "node_modules/crypto-js/enc-utf16.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/enc-utf16.js"(exports, module) {
       (function(root, factory) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core());
@@ -1065,9 +1065,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/enc-base64.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/enc-base64.js
   var require_enc_base64 = __commonJS({
-    "node_modules/crypto-js/enc-base64.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/enc-base64.js"(exports, module) {
       (function(root, factory) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core());
@@ -1173,9 +1173,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/enc-base64url.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/enc-base64url.js
   var require_enc_base64url = __commonJS({
-    "node_modules/crypto-js/enc-base64url.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/enc-base64url.js"(exports, module) {
       (function(root, factory) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core());
@@ -1292,9 +1292,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/md5.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/md5.js
   var require_md5 = __commonJS({
-    "node_modules/crypto-js/md5.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/md5.js"(exports, module) {
       (function(root, factory) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core());
@@ -1471,9 +1471,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/sha1.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/sha1.js
   var require_sha1 = __commonJS({
-    "node_modules/crypto-js/sha1.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/sha1.js"(exports, module) {
       (function(root, factory) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core());
@@ -1562,9 +1562,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/sha256.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/sha256.js
   var require_sha256 = __commonJS({
-    "node_modules/crypto-js/sha256.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/sha256.js"(exports, module) {
       (function(root, factory) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core());
@@ -1683,9 +1683,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/sha224.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/sha224.js
   var require_sha224 = __commonJS({
-    "node_modules/crypto-js/sha224.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/sha224.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_sha256());
@@ -1728,9 +1728,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/sha512.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/sha512.js
   var require_sha512 = __commonJS({
-    "node_modules/crypto-js/sha512.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/sha512.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_x64_core());
@@ -2010,9 +2010,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/sha384.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/sha384.js
   var require_sha384 = __commonJS({
-    "node_modules/crypto-js/sha384.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/sha384.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_x64_core(), require_sha512());
@@ -2056,9 +2056,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/sha3.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/sha3.js
   var require_sha3 = __commonJS({
-    "node_modules/crypto-js/sha3.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/sha3.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_x64_core());
@@ -2258,9 +2258,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/ripemd160.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/ripemd160.js
   var require_ripemd160 = __commonJS({
-    "node_modules/crypto-js/ripemd160.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/ripemd160.js"(exports, module) {
       (function(root, factory) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core());
@@ -2729,9 +2729,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/hmac.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/hmac.js
   var require_hmac = __commonJS({
-    "node_modules/crypto-js/hmac.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/hmac.js"(exports, module) {
       (function(root, factory) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core());
@@ -2836,9 +2836,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/pbkdf2.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/pbkdf2.js
   var require_pbkdf2 = __commonJS({
-    "node_modules/crypto-js/pbkdf2.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/pbkdf2.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_sha256(), require_hmac());
@@ -2934,9 +2934,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/evpkdf.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/evpkdf.js
   var require_evpkdf = __commonJS({
-    "node_modules/crypto-js/evpkdf.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/evpkdf.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_sha1(), require_hmac());
@@ -3025,9 +3025,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/cipher-core.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/cipher-core.js
   var require_cipher_core = __commonJS({
-    "node_modules/crypto-js/cipher-core.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/cipher-core.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_evpkdf());
@@ -3669,9 +3669,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/mode-cfb.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/mode-cfb.js
   var require_mode_cfb = __commonJS({
-    "node_modules/crypto-js/mode-cfb.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/mode-cfb.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_cipher_core());
@@ -3721,9 +3721,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/mode-ctr.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/mode-ctr.js
   var require_mode_ctr = __commonJS({
-    "node_modules/crypto-js/mode-ctr.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/mode-ctr.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_cipher_core());
@@ -3761,9 +3761,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/mode-ctr-gladman.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/mode-ctr-gladman.js
   var require_mode_ctr_gladman = __commonJS({
-    "node_modules/crypto-js/mode-ctr-gladman.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/mode-ctr-gladman.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_cipher_core());
@@ -3836,9 +3836,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/mode-ofb.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/mode-ofb.js
   var require_mode_ofb = __commonJS({
-    "node_modules/crypto-js/mode-ofb.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/mode-ofb.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_cipher_core());
@@ -3874,9 +3874,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/mode-ecb.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/mode-ecb.js
   var require_mode_ecb = __commonJS({
-    "node_modules/crypto-js/mode-ecb.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/mode-ecb.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_cipher_core());
@@ -3905,9 +3905,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/pad-ansix923.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/pad-ansix923.js
   var require_pad_ansix923 = __commonJS({
-    "node_modules/crypto-js/pad-ansix923.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/pad-ansix923.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_cipher_core());
@@ -3937,9 +3937,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/pad-iso10126.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/pad-iso10126.js
   var require_pad_iso10126 = __commonJS({
-    "node_modules/crypto-js/pad-iso10126.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/pad-iso10126.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_cipher_core());
@@ -3965,9 +3965,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/pad-iso97971.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/pad-iso97971.js
   var require_pad_iso97971 = __commonJS({
-    "node_modules/crypto-js/pad-iso97971.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/pad-iso97971.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_cipher_core());
@@ -3992,9 +3992,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/pad-zeropadding.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/pad-zeropadding.js
   var require_pad_zeropadding = __commonJS({
-    "node_modules/crypto-js/pad-zeropadding.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/pad-zeropadding.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_cipher_core());
@@ -4026,9 +4026,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/pad-nopadding.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/pad-nopadding.js
   var require_pad_nopadding = __commonJS({
-    "node_modules/crypto-js/pad-nopadding.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/pad-nopadding.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_cipher_core());
@@ -4049,9 +4049,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/format-hex.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/format-hex.js
   var require_format_hex = __commonJS({
-    "node_modules/crypto-js/format-hex.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/format-hex.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_cipher_core());
@@ -4109,9 +4109,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/aes.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/aes.js
   var require_aes = __commonJS({
-    "node_modules/crypto-js/aes.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/aes.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_enc_base64(), require_md5(), require_evpkdf(), require_cipher_core());
@@ -4263,9 +4263,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/tripledes.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/tripledes.js
   var require_tripledes = __commonJS({
-    "node_modules/crypto-js/tripledes.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/tripledes.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_enc_base64(), require_md5(), require_evpkdf(), require_cipher_core());
@@ -5044,9 +5044,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/rc4.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/rc4.js
   var require_rc4 = __commonJS({
-    "node_modules/crypto-js/rc4.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/rc4.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_enc_base64(), require_md5(), require_evpkdf(), require_cipher_core());
@@ -5127,9 +5127,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/rabbit.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/rabbit.js
   var require_rabbit = __commonJS({
-    "node_modules/crypto-js/rabbit.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/rabbit.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_enc_base64(), require_md5(), require_evpkdf(), require_cipher_core());
@@ -5256,9 +5256,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/rabbit-legacy.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/rabbit-legacy.js
   var require_rabbit_legacy = __commonJS({
-    "node_modules/crypto-js/rabbit-legacy.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/rabbit-legacy.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_enc_base64(), require_md5(), require_evpkdf(), require_cipher_core());
@@ -5382,9 +5382,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/blowfish.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/blowfish.js
   var require_blowfish = __commonJS({
-    "node_modules/crypto-js/blowfish.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/blowfish.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_enc_base64(), require_md5(), require_evpkdf(), require_cipher_core());
@@ -6571,9 +6571,9 @@ var __plugin__ = (() => {
     }
   });
 
-  // node_modules/crypto-js/index.js
+  // node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/index.js
   var require_crypto_js = __commonJS({
-    "node_modules/crypto-js/index.js"(exports, module) {
+    "node_modules/.pnpm/crypto-js@4.2.0/node_modules/crypto-js/index.js"(exports, module) {
       (function(root, factory, undef) {
         if (typeof exports === "object") {
           module.exports = exports = factory(require_core(), require_x64_core(), require_lib_typedarrays(), require_enc_utf16(), require_enc_base64(), require_enc_base64url(), require_md5(), require_sha1(), require_sha256(), require_sha224(), require_sha512(), require_sha384(), require_sha3(), require_ripemd160(), require_hmac(), require_pbkdf2(), require_evpkdf(), require_cipher_core(), require_mode_cfb(), require_mode_ctr(), require_mode_ctr_gladman(), require_mode_ofb(), require_mode_ecb(), require_pad_ansix923(), require_pad_iso10126(), require_pad_iso97971(), require_pad_zeropadding(), require_pad_nopadding(), require_format_hex(), require_aes(), require_tripledes(), require_rc4(), require_rabbit(), require_rabbit_legacy(), require_blowfish());
@@ -6698,13 +6698,48 @@ var __plugin__ = (() => {
     if (!res.ok) throw new Error(`\u864E\u7259 HTTP ${res.status}`);
     const data = await res.json();
     if (data.status !== 200) throw new Error(`\u864E\u7259 \u63A5\u53E3\u9519\u8BEF: ${data.message || data.status}`);
-    return { roomInfo: data.data, topSid: 0 };
+    const baseList = data.data?.stream?.baseSteamInfoList ?? [];
+    return {
+      roomInfo: {
+        tLiveInfo: {
+          sIntroduction: data.data.liveData?.introduction,
+          sScreenshot: data.data.liveData?.screenshot,
+          lTotalCount: data.data.liveData?.userCount,
+          lProfileRoom: roomId,
+          sGameFullName: data.data.liveData?.gameFullName,
+          tLiveStreamInfo: {
+            vStreamInfo: { value: baseList }
+          }
+        },
+        tProfileInfo: {
+          sNick: data.data.profileInfo?.nick,
+          sAvatar180: data.data.profileInfo?.avatar180
+        },
+        eLiveStatus: data.data.liveStatus === "ON" || data.data.liveStatus === "REPLAY" ? 2 : 0
+      },
+      topSid: 0
+    };
   }
   async function resolve(ctx, { roomId }) {
-    const info = await fetchRoomInfoFromHtml(ctx, roomId);
-    const lines = info.roomInfo?.tLiveInfo?.tLiveStreamInfo?.vStreamInfo?.value ?? [];
+    let info = await fetchRoomInfoFromHtml(ctx, roomId);
+    let lines = info.roomInfo?.tLiveInfo?.tLiveStreamInfo?.vStreamInfo?.value ?? [];
     const presenterUid = info.topSid ?? 0;
-    if (lines.length === 0) throw new Error("\u864E\u7259 vStreamInfo \u4E3A\u7A7A\uFF08\u623F\u95F4\u672A\u5F00\u64AD / \u98CE\u63A7\uFF09");
+    if (lines.length === 0) {
+      try {
+        const fallback = await fetchRoomInfoViaBetard(ctx, roomId);
+        const fbLines = fallback.roomInfo?.tLiveInfo?.tLiveStreamInfo?.vStreamInfo?.value ?? [];
+        if (fbLines.length > 0) {
+          info = fallback;
+          lines = fbLines;
+        }
+      } catch {
+      }
+    }
+    if (lines.length === 0) {
+      const isLive = info.roomInfo?.eLiveStatus === 2;
+      if (!isLive) throw new Error("\u864E\u7259\u76F4\u64AD\u95F4\u672A\u5F00\u64AD");
+      throw new Error("\u864E\u7259 vStreamInfo \u4E3A\u7A7A\uFF08\u98CE\u63A7\u9650\u5236\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5\uFF09");
+    }
     let chosen;
     for (const line of lines) {
       if (line.sFlvUrl && line.sFlvAntiCode && line.sStreamName) {
@@ -6734,29 +6769,53 @@ var __plugin__ = (() => {
     if (!res.ok) throw new Error(`\u864E\u7259 HTTP ${res.status}`);
     const data = await res.json();
     const rooms = data.data?.datas || [];
-    const list = rooms.map((r) => ({
-      platform: "huya",
-      roomId: String(r.profileRoom || r.privateHost),
-      title: r.introduction || r.roomName,
-      uname: r.nick,
-      avatar: r.avatar180,
-      cover: r.screenshot,
-      online: parseInt(r.totalCount || "0", 10),
-      category: r.gameFullName,
-      live: true,
-      link: `https://www.huya.com/${r.profileRoom || r.privateHost}`
-    })).filter((r) => r.roomId);
+    const list = rooms.map((r) => {
+      let cover = r.screenshot || "";
+      if (cover && !cover.includes("?")) {
+        cover += "?x-oss-process=style/w338_h190&";
+      }
+      return {
+        platform: "huya",
+        roomId: String(r.profileRoom || r.privateHost),
+        title: r.introduction || r.roomName,
+        uname: r.nick,
+        avatar: r.avatar180,
+        cover,
+        online: parseInt(r.totalCount || "0", 10),
+        category: r.gameFullName,
+        live: true,
+        link: `https://www.huya.com/${r.profileRoom || r.privateHost}`
+      };
+    }).filter((r) => r.roomId);
     return { list, hasMore: rooms.length >= 20 };
   }
+  var PARENT_CATS = [
+    { id: "1", name: "\u7F51\u6E38" },
+    { id: "2", name: "\u5355\u673A" },
+    { id: "8", name: "\u5A31\u4E50" },
+    { id: "3", name: "\u624B\u6E38" }
+  ];
   async function getCategories(ctx) {
-    const res = await ctx.fetch("https://www.huya.com/cache.php?m=Game&do=ajaxGameList", { headers: HEADERS, timeout: 2e4 });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return (data.gameList || []).slice(0, 50).map((g) => ({
-      id: String(g.gid),
-      name: g.gameFullName,
-      cover: g.gameIcon
-    }));
+    const out = [];
+    for (const parent of PARENT_CATS) {
+      try {
+        const res = await ctx.fetch(`https://live.cdn.huya.com/liveconfig/game/bussLive?bussType=${parent.id}`, { headers: HEADERS, timeout: 2e4 });
+        if (!res.ok) continue;
+        const data = await res.json();
+        for (const item of data.data || []) {
+          if (item.gid !== void 0 && item.gid !== null) {
+            out.push({
+              id: String(item.gid),
+              name: item.gameFullName || "",
+              cover: `https://huyaimg.msstatic.com/cdnimage/game/${item.gid}-MS.jpg`,
+              parent: parent.name
+            });
+          }
+        }
+      } catch (e) {
+      }
+    }
+    return out;
   }
   async function getCategoryRooms(ctx, { categoryId, page }) {
     const res = await ctx.fetch(
@@ -6766,41 +6825,55 @@ var __plugin__ = (() => {
     if (!res.ok) throw new Error(`\u864E\u7259 HTTP ${res.status}`);
     const data = await res.json();
     const rooms = data.data?.datas || [];
-    const list = rooms.map((r) => ({
-      platform: "huya",
-      roomId: String(r.profileRoom || r.privateHost),
-      title: r.introduction || r.roomName,
-      uname: r.nick,
-      avatar: r.avatar180,
-      cover: r.screenshot,
-      online: parseInt(r.totalCount || "0", 10),
-      category: r.gameFullName,
-      live: true,
-      link: `https://www.huya.com/${r.profileRoom || r.privateHost}`
-    })).filter((r) => r.roomId);
+    const list = rooms.map((r) => {
+      let cover = r.screenshot || "";
+      if (cover && !cover.includes("?")) {
+        cover += "?x-oss-process=style/w338_h190&";
+      }
+      return {
+        platform: "huya",
+        roomId: String(r.profileRoom || r.privateHost),
+        title: r.introduction || r.roomName,
+        uname: r.nick,
+        avatar: r.avatar180,
+        cover,
+        online: parseInt(r.totalCount || "0", 10),
+        category: r.gameFullName,
+        live: true,
+        link: `https://www.huya.com/${r.profileRoom || r.privateHost}`
+      };
+    }).filter((r) => r.roomId);
     return { list, hasMore: rooms.length >= 20 };
   }
-  async function search(ctx, { keyword }) {
+  async function search(ctx, { keyword, page }) {
+    const start = (page - 1) * 20;
     const res = await ctx.fetch(
-      `https://search.cdn.huya.com/?m=Search&do=getSearchContent&q=${encodeURIComponent(keyword)}&uid=0&v=4&typ=-5&livestate=0&rows=20&start=0`,
+      `https://search.cdn.huya.com/?m=Search&do=getSearchContent&q=${encodeURIComponent(keyword)}&uid=0&v=4&typ=-5&livestate=0&rows=20&start=${start}`,
       { headers: HEADERS, timeout: 2e4 }
     );
     if (!res.ok) return { list: [], hasMore: false };
     const data = await res.json();
-    const items = data.response?.[3]?.docs || data.response?.docs || [];
-    const list = items.map((r) => ({
-      platform: "huya",
-      roomId: String(r.room_id || r.uid),
-      title: r.game_introduction || r.room_name || r.game_nick,
-      uname: r.game_nick,
-      avatar: r.game_avatarUrl180,
-      cover: r.game_screenshot,
-      online: r.game_total_count ?? 0,
-      category: r.gameName,
-      live: r.game_livestate === 1,
-      link: `https://www.huya.com/${r.room_id || r.uid}`
-    })).filter((r) => r.roomId);
-    return { list, hasMore: false };
+    const items = data.response?.["3"]?.docs || [];
+    const list = items.map((r) => {
+      let cover = r.game_screenshot || "";
+      if (cover && !cover.includes("?")) {
+        cover += "?x-oss-process=style/w338_h190&";
+      }
+      return {
+        platform: "huya",
+        roomId: String(r.room_id || r.uid),
+        title: r.game_introduction || r.game_roomName || r.game_nick,
+        uname: r.game_nick,
+        avatar: r.game_imgUrl || r.game_avatarUrl180,
+        cover,
+        online: typeof r.game_total_count === "string" ? parseInt(r.game_total_count, 10) || 0 : r.game_total_count ?? 0,
+        category: r.gameName,
+        live: true,
+        link: `https://www.huya.com/${r.room_id || r.uid}`
+      };
+    }).filter((r) => r.roomId);
+    const numFound = data.response?.["3"]?.numFound ?? 0;
+    return { list, hasMore: numFound > page * 20 };
   }
   async function getRoomDetail(ctx, { roomId }) {
     const info = await fetchRoomInfoFromHtml(ctx, roomId);
@@ -6815,14 +6888,15 @@ var __plugin__ = (() => {
       cover: live?.sScreenshot,
       online: live?.lTotalCount ?? 0,
       category: live?.sGameFullName,
-      live: live?.eLiveStatus === 2,
+      live: info.roomInfo?.eLiveStatus === 2,
+      // 【修复2】修正状态判断路径
       link: `https://www.huya.com/${roomId}`
     };
   }
   async function getLiveStatus(ctx, { roomId }) {
     try {
       const info = await fetchRoomInfoFromHtml(ctx, roomId);
-      return info.roomInfo?.tLiveInfo?.eLiveStatus === 2;
+      return info.roomInfo?.eLiveStatus === 2;
     } catch {
       return false;
     }

@@ -146,9 +146,9 @@
   {
     "id": "live17",
     "label": "17 Live",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "adult": false,
-    "defaultProxy": "direct",
+    "defaultProxy": "proxy",
     "file": "live17.js"
   },
   {

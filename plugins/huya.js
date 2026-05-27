@@ -84,6 +84,7 @@ async function fetchRoomInfoFromHtml(ctx, roomId) {
   return jsonObj;
 }
 
+// 【修复1】恢复对兜底接口的数据结构映射，确保 Resolve 的读取路径不会报错
 async function fetchRoomInfoViaBetard(ctx, roomId) {
   const res = await ctx.fetch(
     `https://mp.huya.com/cache.php?do=profileRoom&m=Live&roomid=${encodeURIComponent(roomId)}`,
@@ -92,7 +93,28 @@ async function fetchRoomInfoViaBetard(ctx, roomId) {
   if (!res.ok) throw new Error(`虎牙 HTTP ${res.status}`);
   const data = await res.json();
   if (data.status !== 200) throw new Error(`虎牙 接口错误: ${data.message || data.status}`);
-  return { roomInfo: data.data, topSid: 0 };
+  
+  const baseList = data.data?.stream?.baseSteamInfoList ?? [];
+  return {
+    roomInfo: {
+      tLiveInfo: {
+        sIntroduction: data.data.liveData?.introduction,
+        sScreenshot: data.data.liveData?.screenshot,
+        lTotalCount: data.data.liveData?.userCount,
+        lProfileRoom: roomId,
+        sGameFullName: data.data.liveData?.gameFullName,
+        tLiveStreamInfo: {
+          vStreamInfo: { value: baseList },
+        },
+      },
+      tProfileInfo: {
+        sNick: data.data.profileInfo?.nick,
+        sAvatar180: data.data.profileInfo?.avatar180,
+      },
+      eLiveStatus: (data.data.liveStatus === "ON" || data.data.liveStatus === "REPLAY") ? 2 : 0,
+    },
+    topSid: 0,
+  };
 }
 
 export async function resolve(ctx, { roomId }) {
@@ -100,7 +122,6 @@ export async function resolve(ctx, { roomId }) {
   let lines = info.roomInfo?.tLiveInfo?.tLiveStreamInfo?.vStreamInfo?.value ?? [];
   const presenterUid = info.topSid ?? 0;
 
-  // 如果 HTML 解析成功但 vStreamInfo 为空，尝试 betard API 兜底
   if (lines.length === 0) {
     try {
       const fallback = await fetchRoomInfoViaBetard(ctx, roomId);
@@ -113,21 +134,25 @@ export async function resolve(ctx, { roomId }) {
   }
 
   if (lines.length === 0) {
-    const isLive = info.roomInfo?.tLiveInfo?.eLiveStatus === 2;
+    // 【修复2】修正 eLiveStatus 的读取层级，它是 roomInfo 的直接子属性
+    const isLive = info.roomInfo?.eLiveStatus === 2;
     if (!isLive) throw new Error("虎牙直播间未开播");
     throw new Error("虎牙 vStreamInfo 为空（风控限制，请稍后重试）");
   }
+
   let chosen;
   for (const line of lines) {
     if (line.sFlvUrl && line.sFlvAntiCode && line.sStreamName) { chosen = line; break; }
   }
   if (!chosen) throw new Error("虎牙未匹配到可播流");
+
   const anti = buildAntiCode(chosen.sStreamName, presenterUid, chosen.sFlvAntiCode);
   const url = `${chosen.sFlvUrl}/${chosen.sStreamName}.flv?${anti}&codec=264`;
   const biterates = info.roomInfo?.tLiveInfo?.tLiveStreamInfo?.vBitRateInfo?.value ?? [];
   const alternatives = biterates
     .filter((b) => b.sDisplayName && !b.sDisplayName.includes("HDR"))
     .map((b) => ({ qn: String(b.iBitRate ?? 0), label: b.sDisplayName, url: b.iBitRate === 0 ? url : "" }));
+
   return ctx.protocols.flvStream({
     url, qn: "0", qnLabel: alternatives.find((a) => a.qn === "0")?.label ?? "原画",
     alternatives: alternatives.length > 0 ? alternatives : undefined,
@@ -143,24 +168,56 @@ export async function getRecommend(ctx, { page, pageSize }) {
   if (!res.ok) throw new Error(`虎牙 HTTP ${res.status}`);
   const data = await res.json();
   const rooms = data.data?.datas || [];
-  const list = rooms.map((r) => ({
-    platform: "huya", roomId: String(r.profileRoom || r.privateHost),
-    title: r.introduction || r.roomName, uname: r.nick,
-    avatar: r.avatar180, cover: r.screenshot,
-    online: parseInt(r.totalCount || "0", 10),
-    category: r.gameFullName, live: true,
-    link: `https://www.huya.com/${r.profileRoom || r.privateHost}`,
-  })).filter((r) => r.roomId);
+  
+  const list = rooms.map((r) => {
+    // 【修复4】找回原版针对无后缀图片的防盗链/缩放处理
+    let cover = r.screenshot || "";
+    if (cover && !cover.includes("?")) {
+      cover += "?x-oss-process=style/w338_h190&";
+    }
+    return {
+      platform: "huya", roomId: String(r.profileRoom || r.privateHost),
+      title: r.introduction || r.roomName, uname: r.nick,
+      avatar: r.avatar180, cover,
+      online: parseInt(r.totalCount || "0", 10),
+      category: r.gameFullName, live: true,
+      link: `https://www.huya.com/${r.profileRoom || r.privateHost}`,
+    };
+  }).filter((r) => r.roomId);
+  
   return { list, hasMore: rooms.length >= 20 };
 }
 
+// 【修复5】将分类接口改回了你 TS 源码中使用的并发抓取逻辑
+const PARENT_CATS = [
+  { id: "1", name: "网游" },
+  { id: "2", name: "单机" },
+  { id: "8", name: "娱乐" },
+  { id: "3", name: "手游" },
+];
+
 export async function getCategories(ctx) {
-  const res = await ctx.fetch("https://www.huya.com/cache.php?m=Game&do=ajaxGameList", { headers: HEADERS, timeout: 20000 });
-  if (!res.ok) return [];
-  const data = await res.json();
-  return (data.gameList || []).slice(0, 50).map((g) => ({
-    id: String(g.gid), name: g.gameFullName, cover: g.gameIcon,
-  }));
+  const out = [];
+  for (const parent of PARENT_CATS) {
+    try {
+      const res = await ctx.fetch(`https://live.cdn.huya.com/liveconfig/game/bussLive?bussType=${parent.id}`, { headers: HEADERS, timeout: 20000 });
+      if (!res.ok) continue;
+      const data = await res.json();
+      for (const item of data.data || []) {
+        if (item.gid !== undefined && item.gid !== null) {
+          out.push({
+            id: String(item.gid),
+            name: item.gameFullName || "",
+            cover: `https://huyaimg.msstatic.com/cdnimage/game/${item.gid}-MS.jpg`,
+            parent: parent.name,
+          });
+        }
+      }
+    } catch (e) {
+      // ignore warning
+    }
+  }
+  return out;
 }
 
 export async function getCategoryRooms(ctx, { categoryId, page }) {
@@ -171,34 +228,54 @@ export async function getCategoryRooms(ctx, { categoryId, page }) {
   if (!res.ok) throw new Error(`虎牙 HTTP ${res.status}`);
   const data = await res.json();
   const rooms = data.data?.datas || [];
-  const list = rooms.map((r) => ({
-    platform: "huya", roomId: String(r.profileRoom || r.privateHost),
-    title: r.introduction || r.roomName, uname: r.nick,
-    avatar: r.avatar180, cover: r.screenshot,
-    online: parseInt(r.totalCount || "0", 10),
-    category: r.gameFullName, live: true,
-    link: `https://www.huya.com/${r.profileRoom || r.privateHost}`,
-  })).filter((r) => r.roomId);
+  
+  const list = rooms.map((r) => {
+    let cover = r.screenshot || "";
+    if (cover && !cover.includes("?")) {
+      cover += "?x-oss-process=style/w338_h190&";
+    }
+    return {
+      platform: "huya", roomId: String(r.profileRoom || r.privateHost),
+      title: r.introduction || r.roomName, uname: r.nick,
+      avatar: r.avatar180, cover,
+      online: parseInt(r.totalCount || "0", 10),
+      category: r.gameFullName, live: true,
+      link: `https://www.huya.com/${r.profileRoom || r.privateHost}`,
+    };
+  }).filter((r) => r.roomId);
+  
   return { list, hasMore: rooms.length >= 20 };
 }
 
-export async function search(ctx, { keyword }) {
+export async function search(ctx, { keyword, page }) {
+  // 【修复3】恢复 start 偏移量计算和 hasMore 下一页判断
+  const start = (page - 1) * 20;
   const res = await ctx.fetch(
-    `https://search.cdn.huya.com/?m=Search&do=getSearchContent&q=${encodeURIComponent(keyword)}&uid=0&v=4&typ=-5&livestate=0&rows=20&start=0`,
+    `https://search.cdn.huya.com/?m=Search&do=getSearchContent&q=${encodeURIComponent(keyword)}&uid=0&v=4&typ=-5&livestate=0&rows=20&start=${start}`,
     { headers: HEADERS, timeout: 20000 }
   );
   if (!res.ok) return { list: [], hasMore: false };
   const data = await res.json();
-  const items = data.response?.[3]?.docs || data.response?.docs || [];
-  const list = items.map((r) => ({
-    platform: "huya", roomId: String(r.room_id || r.uid),
-    title: r.game_introduction || r.room_name || r.game_nick,
-    uname: r.game_nick, avatar: r.game_avatarUrl180,
-    cover: r.game_screenshot, online: r.game_total_count ?? 0,
-    category: r.gameName, live: r.game_livestate === 1,
-    link: `https://www.huya.com/${r.room_id || r.uid}`,
-  })).filter((r) => r.roomId);
-  return { list, hasMore: false };
+  const items = data.response?.["3"]?.docs || [];
+  
+  const list = items.map((r) => {
+    let cover = r.game_screenshot || "";
+    if (cover && !cover.includes("?")) {
+      cover += "?x-oss-process=style/w338_h190&";
+    }
+    return {
+      platform: "huya", roomId: String(r.room_id || r.uid),
+      title: r.game_introduction || r.game_roomName || r.game_nick,
+      uname: r.game_nick, avatar: r.game_imgUrl || r.game_avatarUrl180,
+      cover, 
+      online: typeof r.game_total_count === "string" ? parseInt(r.game_total_count, 10) || 0 : (r.game_total_count ?? 0),
+      category: r.gameName, live: true,
+      link: `https://www.huya.com/${r.room_id || r.uid}`,
+    };
+  }).filter((r) => r.roomId);
+  
+  const numFound = data.response?.["3"]?.numFound ?? 0;
+  return { list, hasMore: numFound > page * 20 };
 }
 
 export async function getRoomDetail(ctx, { roomId }) {
@@ -213,7 +290,7 @@ export async function getRoomDetail(ctx, { roomId }) {
     cover: live?.sScreenshot,
     online: live?.lTotalCount ?? 0,
     category: live?.sGameFullName,
-    live: live?.eLiveStatus === 2,
+    live: info.roomInfo?.eLiveStatus === 2, // 【修复2】修正状态判断路径
     link: `https://www.huya.com/${roomId}`,
   };
 }
@@ -221,7 +298,6 @@ export async function getRoomDetail(ctx, { roomId }) {
 export async function getLiveStatus(ctx, { roomId }) {
   try {
     const info = await fetchRoomInfoFromHtml(ctx, roomId);
-    return info.roomInfo?.tLiveInfo?.eLiveStatus === 2;
+    return info.roomInfo?.eLiveStatus === 2; // 【修复2】修正状态判断路径
   } catch { return false; }
 }
-

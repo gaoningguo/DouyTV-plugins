@@ -10,7 +10,8 @@
 export const manifest = {
   id: "live17",
   label: "17 Live",
-  version: "1.0.0",
+  version: "1.0.1",
+  defaultProxy: "proxy",
   engine: { netliveApi: 1 },
 };
 
@@ -35,7 +36,7 @@ function normalizeImage(url) {
 
 function mapStream(stream) {
   const user = stream.userInfo;
-  const roomId = user?.userID ?? stream.userID;
+  const roomId = user?.roomID ?? stream.liveStreamID;
   if (!roomId) return undefined;
 
   return {
@@ -182,24 +183,12 @@ async function fetchRoom(ctx, roomId) {
   // 优先使用直接获取单个直播间的 API
   try {
     const res = await ctx.fetch(
-      `https://wap-api.17app.co/api/v1/lives/${roomId}`,
+      `https://wap-api.17app.co/api/v1/lives/${roomId}/info`,
       { method: "GET", headers: COMMON_HEADERS, timeout: 15000, http2: true }
     );
     if (res.ok) {
       const data = await res.json();
-      if (data && (data.userInfo || data.userID)) return data;
-    }
-  } catch {}
-
-  // 备用：尝试 cells 接口搜索
-  try {
-    const cells = await getJsonHelper(ctx,
-      "https://wap-api.17app.co/api/v1/cells?count=50&cursor=&paging=1&region=SG&tab=hot_opt"
-    );
-    for (const cell of cells.cells ?? []) {
-      if (!cell.stream) continue;
-      const uid = cell.stream.userInfo?.userID ?? cell.stream.userID;
-      if (uid === roomId) return cell.stream;
+      if (data) return data;
     }
   } catch {}
 
@@ -263,8 +252,9 @@ export async function resolve(ctx, { roomId }) {
     urls.find((v) => !!v.urlQualityEnhancedHD) ??
     urls[0];
 
+  // 优先 H.264 FLV（MSE 兼容），回退到普通质量
   const flvUrl =
-    best.urlQualityEnhancedHD ??
+    best.url264 ??
     best.urlHighQuality ??
     best.url ??
     best.urlLowQuality;
@@ -277,13 +267,8 @@ export async function resolve(ctx, { roomId }) {
 
   const alternatives = urls
     .map((v) => {
-      const u =
-        v.urlQualityEnhancedHD ??
-        v.urlHighQuality ??
-        v.url;
-
+      const u = v.url264 ?? v.urlHighQuality ?? v.url;
       if (!u) return null;
-
       return {
         qn: String(v.provider ?? "auto"),
         label: `线路 ${v.provider ?? "auto"}`,

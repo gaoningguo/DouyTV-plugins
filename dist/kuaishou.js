@@ -209,10 +209,42 @@ var __plugin__ = (() => {
         "Sec-Fetch-User": "?1"
       }
     });
-    const m = html.match(/window\.__INITIAL_STATE__=([\s\S]*?);/);
-    const raw = m ? m[1] : null;
-    if (!raw) throw new Error("\u5FEB\u624B\u672A\u627E\u5230 __INITIAL_STATE__");
-    const cleaned = raw.replace(/undefined/g, "null");
+    const marker = "window.__INITIAL_STATE__=";
+    const idx = html.indexOf(marker);
+    if (idx === -1) throw new Error("\u5FEB\u624B\u672A\u627E\u5230 __INITIAL_STATE__");
+    const start = idx + marker.length;
+    let depth = 0;
+    let end = start;
+    let inStr = false;
+    let escape = false;
+    for (let i = start; i < html.length; i++) {
+      const ch = html[i];
+      if (escape) {
+        escape = false;
+        continue;
+      }
+      if (ch === "\\") {
+        escape = true;
+        continue;
+      }
+      if (ch === '"') {
+        inStr = !inStr;
+        continue;
+      }
+      if (inStr) continue;
+      if (ch === "{" || ch === "[") {
+        depth++;
+      } else if (ch === "}" || ch === "]") {
+        depth--;
+        if (depth === 0) {
+          end = i + 1;
+          break;
+        }
+      }
+    }
+    if (depth !== 0) throw new Error("\u5FEB\u624B __INITIAL_STATE__ JSON \u672A\u95ED\u5408");
+    const raw = html.slice(start, end);
+    const cleaned = raw.replace(/\bundefined\b/g, "null");
     try {
       return JSON.parse(cleaned);
     } catch (e) {

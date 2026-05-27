@@ -33,7 +33,8 @@ var __plugin__ = (() => {
   var manifest = {
     id: "live17",
     label: "17 Live",
-    version: "1.0.0",
+    version: "1.0.1",
+    defaultProxy: "proxy",
     engine: { netliveApi: 1 }
   };
   var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
@@ -52,7 +53,7 @@ var __plugin__ = (() => {
   }
   function mapStream(stream) {
     const user = stream.userInfo;
-    const roomId = user?.userID ?? stream.userID;
+    const roomId = user?.roomID ?? stream.liveStreamID;
     if (!roomId) return void 0;
     return {
       platform: "live17",
@@ -152,14 +153,16 @@ var __plugin__ = (() => {
     return { list, hasMore: false };
   }
   async function fetchRoom(ctx, roomId) {
-    const cells = await getJsonHelper(
-      ctx,
-      "https://wap-api.17app.co/api/v1/cells?count=50&cursor=&paging=1&region=SG&tab=hot_opt"
-    );
-    for (const cell of cells.cells ?? []) {
-      if (!cell.stream) continue;
-      const uid = cell.stream.userInfo?.userID ?? cell.stream.userID;
-      if (uid === roomId) return cell.stream;
+    try {
+      const res = await ctx.fetch(
+        `https://wap-api.17app.co/api/v1/lives/${roomId}/info`,
+        { method: "GET", headers: COMMON_HEADERS, timeout: 15e3, http2: true }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (data) return data;
+      }
+    } catch {
     }
     return null;
   }
@@ -197,13 +200,13 @@ var __plugin__ = (() => {
       throw new Error("17Live \u672A\u8FD4\u56DE\u6D41\u5730\u5740");
     }
     const best = urls.find((v) => !!v.urlQualityEnhancedHD) ?? urls[0];
-    const flvUrl = best.urlQualityEnhancedHD ?? best.urlHighQuality ?? best.url ?? best.urlLowQuality;
+    const flvUrl = best.url264 ?? best.urlHighQuality ?? best.url ?? best.urlLowQuality;
     if (!flvUrl) {
       throw new Error("17Live FLV \u5730\u5740\u4E3A\u7A7A");
     }
     const hlsUrl = flvToHls(flvUrl);
     const alternatives = urls.map((v) => {
-      const u = v.urlQualityEnhancedHD ?? v.urlHighQuality ?? v.url;
+      const u = v.url264 ?? v.urlHighQuality ?? v.url;
       if (!u) return null;
       return {
         qn: String(v.provider ?? "auto"),
