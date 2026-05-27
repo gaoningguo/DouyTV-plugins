@@ -179,14 +179,30 @@ export async function search(ctx, { keyword, page }) {
 /* ─────────────── detail ─────────────── */
 
 async function fetchRoom(ctx, roomId) {
-  const cells = await getJsonHelper(ctx,
-    "https://wap-api.17app.co/api/v1/cells?count=50&cursor=&paging=1&region=SG&tab=hot_opt"
-  );
-  for (const cell of cells.cells ?? []) {
-    if (!cell.stream) continue;
-    const uid = cell.stream.userInfo?.userID ?? cell.stream.userID;
-    if (uid === roomId) return cell.stream;
-  }
+  // 优先使用直接获取单个直播间的 API
+  try {
+    const res = await ctx.fetch(
+      `https://wap-api.17app.co/api/v1/lives/${roomId}`,
+      { method: "GET", headers: COMMON_HEADERS, timeout: 15000, http2: true }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      if (data && (data.userInfo || data.userID)) return data;
+    }
+  } catch {}
+
+  // 备用：尝试 cells 接口搜索
+  try {
+    const cells = await getJsonHelper(ctx,
+      "https://wap-api.17app.co/api/v1/cells?count=50&cursor=&paging=1&region=SG&tab=hot_opt"
+    );
+    for (const cell of cells.cells ?? []) {
+      if (!cell.stream) continue;
+      const uid = cell.stream.userInfo?.userID ?? cell.stream.userID;
+      if (uid === roomId) return cell.stream;
+    }
+  } catch {}
+
   return null;
 }
 

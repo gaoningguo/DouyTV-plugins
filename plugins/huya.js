@@ -96,10 +96,27 @@ async function fetchRoomInfoViaBetard(ctx, roomId) {
 }
 
 export async function resolve(ctx, { roomId }) {
-  const info = await fetchRoomInfoFromHtml(ctx, roomId);
-  const lines = info.roomInfo?.tLiveInfo?.tLiveStreamInfo?.vStreamInfo?.value ?? [];
+  let info = await fetchRoomInfoFromHtml(ctx, roomId);
+  let lines = info.roomInfo?.tLiveInfo?.tLiveStreamInfo?.vStreamInfo?.value ?? [];
   const presenterUid = info.topSid ?? 0;
-  if (lines.length === 0) throw new Error("虎牙 vStreamInfo 为空（房间未开播 / 风控）");
+
+  // 如果 HTML 解析成功但 vStreamInfo 为空，尝试 betard API 兜底
+  if (lines.length === 0) {
+    try {
+      const fallback = await fetchRoomInfoViaBetard(ctx, roomId);
+      const fbLines = fallback.roomInfo?.tLiveInfo?.tLiveStreamInfo?.vStreamInfo?.value ?? [];
+      if (fbLines.length > 0) {
+        info = fallback;
+        lines = fbLines;
+      }
+    } catch {}
+  }
+
+  if (lines.length === 0) {
+    const isLive = info.roomInfo?.tLiveInfo?.eLiveStatus === 2;
+    if (!isLive) throw new Error("虎牙直播间未开播");
+    throw new Error("虎牙 vStreamInfo 为空（风控限制，请稍后重试）");
+  }
   let chosen;
   for (const line of lines) {
     if (line.sFlvUrl && line.sFlvAntiCode && line.sStreamName) { chosen = line; break; }

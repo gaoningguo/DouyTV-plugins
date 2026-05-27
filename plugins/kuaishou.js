@@ -171,10 +171,31 @@ async function fetchInitialState(ctx, roomId) {
       "Sec-Fetch-User": "?1",
     },
   });
-  const m = html.match(/window\.__INITIAL_STATE__=([\s\S]*?);/);
-  const raw = m ? m[1] : null;
-  if (!raw) throw new Error("快手未找到 __INITIAL_STATE__");
-  const cleaned = raw.replace(/undefined/g, "null");
+  // 使用贪婪匹配 + 锚定到 </script> 或换行后的赋值语句
+  const marker = "window.__INITIAL_STATE__=";
+  const idx = html.indexOf(marker);
+  if (idx === -1) throw new Error("快手未找到 __INITIAL_STATE__");
+  const start = idx + marker.length;
+  // 找到对应的闭合：state 是一个完整 JSON 对象，从 { 开始到匹配的 } 结束
+  let depth = 0;
+  let end = start;
+  let inStr = false;
+  let escape = false;
+  for (let i = start; i < html.length; i++) {
+    const ch = html[i];
+    if (escape) { escape = false; continue; }
+    if (ch === "\\") { escape = true; continue; }
+    if (ch === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (ch === "{" || ch === "[") { depth++; }
+    else if (ch === "}" || ch === "]") {
+      depth--;
+      if (depth === 0) { end = i + 1; break; }
+    }
+  }
+  if (depth !== 0) throw new Error("快手 __INITIAL_STATE__ JSON 未闭合");
+  const raw = html.slice(start, end);
+  const cleaned = raw.replace(/\bundefined\b/g, "null");
   try { return JSON.parse(cleaned); }
   catch (e) { throw new Error("快手 __INITIAL_STATE__ 解析失败：" + e.message); }
 }
