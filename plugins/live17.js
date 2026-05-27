@@ -179,25 +179,14 @@ export async function search(ctx, { keyword, page }) {
 /* ─────────────── detail ─────────────── */
 
 async function fetchRoom(ctx, roomId) {
-  const data = await fetchCells(ctx, {
-    tab: "hot_opt",
-    count: 50,
-  });
-
-  for (const room of data.list) {
-    if (room.roomId === roomId) {
-      const cells = await getJsonHelper(ctx,
-        "https://wap-api.17app.co/api/v1/cells?count=50&cursor=&paging=1&region=SG&tab=hot_opt"
-      );
-
-      for (const cell of cells.cells ?? []) {
-        if (cell.stream?.userInfo?.userID === roomId) {
-          return cell.stream;
-        }
-      }
-    }
+  const cells = await getJsonHelper(ctx,
+    "https://wap-api.17app.co/api/v1/cells?count=50&cursor=&paging=1&region=SG&tab=hot_opt"
+  );
+  for (const cell of cells.cells ?? []) {
+    if (!cell.stream) continue;
+    const uid = cell.stream.userInfo?.userID ?? cell.stream.userID;
+    if (uid === roomId) return cell.stream;
   }
-
   return null;
 }
 

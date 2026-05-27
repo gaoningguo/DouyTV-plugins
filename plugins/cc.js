@@ -229,6 +229,17 @@ export async function resolve(ctx, { roomId }) {
   if (r.status !== 1) throw new Error("CC 直播间未开播");
   const picked = pickCcStream(r);
   if (!picked.primary) throw new Error("CC 未匹配到可播流");
+  const isFlv = !picked.primary.includes(".m3u8");
+  if (isFlv) {
+    return ctx.protocols.flvStream({
+      url: picked.primary,
+      qn: picked.alts[0]?.qn,
+      qnLabel: picked.alts[0]?.label,
+      alternatives: picked.alts.length > 0 ? picked.alts : undefined,
+      referer: "https://cc.163.com/",
+      ua: UA,
+    });
+  }
   return ctx.protocols.hlsStream({
     url: picked.primary,
     qn: picked.alts[0]?.qn,

@@ -224,6 +224,17 @@ var __plugin__ = (() => {
     if (r.status !== 1) throw new Error("CC \u76F4\u64AD\u95F4\u672A\u5F00\u64AD");
     const picked = pickCcStream(r);
     if (!picked.primary) throw new Error("CC \u672A\u5339\u914D\u5230\u53EF\u64AD\u6D41");
+    const isFlv = !picked.primary.includes(".m3u8");
+    if (isFlv) {
+      return ctx.protocols.flvStream({
+        url: picked.primary,
+        qn: picked.alts[0]?.qn,
+        qnLabel: picked.alts[0]?.label,
+        alternatives: picked.alts.length > 0 ? picked.alts : void 0,
+        referer: "https://cc.163.com/",
+        ua: UA
+      });
+    }
     return ctx.protocols.hlsStream({
       url: picked.primary,
       qn: picked.alts[0]?.qn,

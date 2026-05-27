@@ -50,16 +50,126 @@ var __plugin__ = (() => {
     "Content-Type": "application/json"
   };
   var GRAPH_QUERY = `query getGenderPreferencePageData($input: BroadcastsInput, $keys: [String!]) {
+  i18n {
+    id
+    values: translate(keys: $keys)
+    __typename
+  }
+  user {
+    id
+    accessControl {
+      id
+      isLogged
+      isGuest
+      isGold
+      isSFWMode
+      __typename
+    }
+    isBroadcastApproved
+    savedFilters {
+      id
+      name
+      gender
+      filters {
+        id
+        name
+        category
+        slug
+        i18nKey
+        i18nValue
+        __typename
+      }
+      __typename
+    }
+    userModals {
+      action
+      count
+      dateAdded
+      modalType
+      updatedAt
+      __typename
+    }
+    __typename
+  }
+  appData {
+    id
+    banner {
+      id
+      isVisible
+      title
+      titleColor
+      body
+      bodyColor
+      backgroundURL
+      actionURL
+      __typename
+    }
+    __typename
+  }
   broadcasts(input: $input) {
     total
     items {
       ... on BroadcastItem {
-        id username country sexualOrientation profileImageURL
-        preview { sourceType src poster orientation __typename }
-        viewers verified broadcastType showType gender
-        tags { name slug i18nValue __typename }
+        id
+        username
+        country
+        sexualOrientation
+        profileImageURL
+        preview {
+          sourceType
+          src
+          poster
+          orientation
+          __typename
+        }
+        viewers
+        verified
+        broadcastType
+        showType
+        hasNewBroadcasterBadge
+        hasLiveTouchBadge
+        hasBoostBadge
+        hasDailyAwardBadge
+        hasViewerCountBadge
+        realCountry
+        gender
+        tags {
+          name
+          slug
+          i18nKey
+          i18nValue
+          __typename
+        }
         __typename
       }
+      __typename
+    }
+    order {
+      name
+      i18nKey
+      i18nValue
+      value
+      __typename
+    }
+    filterCategories {
+      id
+      name
+      i18nKey
+      i18nValue
+      __typename
+    }
+    filters {
+      id
+      category
+      i18nValue
+      name
+      slug
+      __typename
+    }
+    tags {
+      name
+      slug
+      i18nValue
       __typename
     }
     __typename
@@ -67,7 +177,9 @@ var __plugin__ = (() => {
 }`;
   var GRAPH_KEYS = [
     "directory.tab.female",
-    "profile.profile.gender.female"
+    "profile.profile.gender.female",
+    "metatags.metatags.female.h1",
+    "directory.h1.title.female.top"
   ];
   async function fetchGraph(ctx, gender, offset, first) {
     const body = {

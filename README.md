@@ -13,7 +13,7 @@ DouyTV 网络直播插件库 — 30 个直播平台的独立 JS 插件。
 在 DouyTV 中：**设置 → 直播管理 → 网络直播 → 添加订阅**，输入本仓库地址：
 
 ```
-https://github.com/GAONX6/DouyTV-plugins
+https://github.com/gaoningguo/DouyTV-plugins
 ```
 
 即可自动导入全部平台插件，并每 12 小时自动同步更新。

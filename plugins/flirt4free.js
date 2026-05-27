@@ -30,7 +30,19 @@ function parseModels(html) {
   const after = html.slice(start + needle.length);
   const arrStart = after.indexOf("[");
   if (arrStart === -1) return [];
-  const arrEnd = after.indexOf("],\n", arrStart);
+  // Try multiple end patterns — the format varies between deployments
+  let arrEnd = after.indexOf("],\n", arrStart);
+  if (arrEnd === -1) arrEnd = after.indexOf("],\r\n", arrStart);
+  if (arrEnd === -1) arrEnd = after.indexOf("];\n", arrStart);
+  if (arrEnd === -1) arrEnd = after.indexOf("];\r\n", arrStart);
+  if (arrEnd === -1) {
+    // Fallback: find matching bracket by counting depth
+    let depth = 0;
+    for (let i = arrStart; i < after.length && i < arrStart + 2000000; i++) {
+      if (after[i] === "[") depth++;
+      else if (after[i] === "]") { depth--; if (depth === 0) { arrEnd = i; break; } }
+    }
+  }
   if (arrEnd === -1) return [];
   const slice = after.slice(arrStart, arrEnd + 1).replace(/,\s*]\s*$/, "]");
   try {

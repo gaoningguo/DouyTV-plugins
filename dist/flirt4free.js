@@ -49,7 +49,23 @@ var __plugin__ = (() => {
     const after = html.slice(start + needle.length);
     const arrStart = after.indexOf("[");
     if (arrStart === -1) return [];
-    const arrEnd = after.indexOf("],\n", arrStart);
+    let arrEnd = after.indexOf("],\n", arrStart);
+    if (arrEnd === -1) arrEnd = after.indexOf("],\r\n", arrStart);
+    if (arrEnd === -1) arrEnd = after.indexOf("];\n", arrStart);
+    if (arrEnd === -1) arrEnd = after.indexOf("];\r\n", arrStart);
+    if (arrEnd === -1) {
+      let depth = 0;
+      for (let i = arrStart; i < after.length && i < arrStart + 2e6; i++) {
+        if (after[i] === "[") depth++;
+        else if (after[i] === "]") {
+          depth--;
+          if (depth === 0) {
+            arrEnd = i;
+            break;
+          }
+        }
+      }
+    }
     if (arrEnd === -1) return [];
     const slice = after.slice(arrStart, arrEnd + 1).replace(/,\s*]\s*$/, "]");
     try {
