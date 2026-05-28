@@ -218,6 +218,16 @@ export async function getLiveStatus(ctx, { roomId }) {
 
 /* ─────────────── resolve ─────────────── */
 
+function flvToHls(url) {
+  if (url.includes("wansu")) {
+    return url.replace(".flv", "/playlist.m3u8");
+  }
+
+  return url
+    .replace("pull-rtmp", "pull-hls")
+    .replace(".flv", ".m3u8");
+}
+
 export async function resolve(ctx, { roomId }) {
   const stream = await fetchRoom(ctx, roomId);
 
@@ -242,8 +252,9 @@ export async function resolve(ctx, { roomId }) {
     urls.find((v) => !!v.urlQualityEnhancedHD) ??
     urls[0];
 
+  // 优先 H.264 FLV（MSE 兼容），回退到普通质量
   const flvUrl =
-    best.urlQualityEnhancedHD ??
+    best.url264 ??
     best.urlHighQuality ??
     best.url ??
     best.urlLowQuality;
@@ -252,23 +263,22 @@ export async function resolve(ctx, { roomId }) {
     throw new Error("17Live FLV 地址为空");
   }
 
+  const hlsUrl = flvToHls(flvUrl);
+
   const alternatives = urls
     .map((v) => {
-      const u =
-        v.urlQualityEnhancedHD ??
-        v.urlHighQuality ??
-        v.url;
+      const u = v.url264 ?? v.urlHighQuality ?? v.url;
       if (!u) return null;
       return {
         qn: String(v.provider ?? "auto"),
         label: `线路 ${v.provider ?? "auto"}`,
-        url: u,
+        url: flvToHls(u),
       };
     })
     .filter((v) => !!v);
 
-  return ctx.protocols.flvStream({
-    url: flvUrl,
+  return ctx.protocols.hlsStream({
+    url: hlsUrl,
     qn: "origin",
     qnLabel: "原画",
     alternatives,
