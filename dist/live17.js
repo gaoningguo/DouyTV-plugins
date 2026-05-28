@@ -181,12 +181,6 @@ var __plugin__ = (() => {
     const stream = await fetchRoom(ctx, roomId);
     return stream?.status === 2;
   }
-  function flvToHls(url) {
-    if (url.includes("wansu")) {
-      return url.replace(".flv", "/playlist.m3u8");
-    }
-    return url.replace("pull-rtmp", "pull-hls").replace(".flv", ".m3u8");
-  }
   async function resolve(ctx, { roomId }) {
     const stream = await fetchRoom(ctx, roomId);
     if (!stream) {
@@ -200,22 +194,21 @@ var __plugin__ = (() => {
       throw new Error("17Live \u672A\u8FD4\u56DE\u6D41\u5730\u5740");
     }
     const best = urls.find((v) => !!v.urlQualityEnhancedHD) ?? urls[0];
-    const flvUrl = best.url264 ?? best.urlHighQuality ?? best.url ?? best.urlLowQuality;
+    const flvUrl = best.urlQualityEnhancedHD ?? best.urlHighQuality ?? best.url ?? best.urlLowQuality;
     if (!flvUrl) {
       throw new Error("17Live FLV \u5730\u5740\u4E3A\u7A7A");
     }
-    const hlsUrl = flvToHls(flvUrl);
     const alternatives = urls.map((v) => {
-      const u = v.url264 ?? v.urlHighQuality ?? v.url;
+      const u = v.urlQualityEnhancedHD ?? v.urlHighQuality ?? v.url;
       if (!u) return null;
       return {
         qn: String(v.provider ?? "auto"),
         label: `\u7EBF\u8DEF ${v.provider ?? "auto"}`,
-        url: flvToHls(u)
+        url: u
       };
     }).filter((v) => !!v);
-    return ctx.protocols.hlsStream({
-      url: hlsUrl,
+    return ctx.protocols.flvStream({
+      url: flvUrl,
       qn: "origin",
       qnLabel: "\u539F\u753B",
       alternatives,
